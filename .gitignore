@@ -95,7 +95,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-passivelogic-project/*
+
 
 # Spyder project settings
 .spyderproject
