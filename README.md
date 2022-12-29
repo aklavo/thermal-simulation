@@ -18,10 +18,11 @@ Minimum Requirements:
 ![system-diagram](system-diagram.jpg)
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The packages require to run this code can be installed with the following command:  
+`pip install -r requirements.txt`
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Execute the similation by running the command:  
+`python main.py`  
+Displayed first in the console will be the results of the main simulation component parameters and the mass flow rate (m), pressure (p), enthalpy (e), and temperature (T) at all the connection locations. Refer to inline comments for connection locations. All units are in SI. Below this will be many simulations iterating over a range of ambient temperature and irradiance values necessary to produce the 3D plot of thermal efficiency. To kill the process simply exit the graphical pop-up window.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
