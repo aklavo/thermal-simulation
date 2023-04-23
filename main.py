@@ -13,24 +13,31 @@ panel_area = 2 # m^2
 pipe_1_len = 5 # m
 pipe_2_len = 5 # m
 pipe_3_len = 10 # m
-pipe_diameter = 0.02 # m
+pipe_diameter = 0.10 # m
 tank_volume = 3 # m^3
+rho_H20= 100 # kg/m^3
 
 # Components
-Panel = comps.SolarPanel(panel_area, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # solar water heating panel
+Panel = comps.SolarPanel(panel_area, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # solar water panel
 Pipe_1 = comps.Pipe(pipe_1_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between panel and pump
 Pump = comps.Pump(intial_temp,intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # circulation pump
 Pipe_2 = comps.Pipe(pipe_2_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between pump and tank 
 Tank = comps.StorageTank(tank_volume, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # hot water storage
 Pipe_3 = comps.Pipe(pipe_3_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between tank and panel 
 
+panel_vol = Panel.volume(pipe_diameter)
+panel_H20_mass = Panel.mass_fulid(rho_H20,pipe_diameter)
+pipe_1_vol = Pipe_1.volume()
+pipe_2_vol = Pipe_2.volume()
+pipe_3_vol = Pipe_3.volume()
+pipe_1_H20_mass = Pipe_1.mass_fulid(rho_H20)
+pipe_2_H20_mass = Pipe_2.mass_fulid(rho_H20)
+pipe_3_H20_mass = Pipe_3.mass_fulid(rho_H20)
+tank_H20_mass = Tank.mass_fulid(rho_H20)
+
 # Lists to store simulation results
 panel_temperatures = []
 tank_temperatures = []
-total_heat_inputs = []
-total_heat_outputs = []
-total_heat_losses = []
-panel_heat_inputs = []
 
 # Simulation parameters
 hours = 24
@@ -43,17 +50,24 @@ for i in range(time_step):
     panel_temperatures.append(Panel.temp_out)
     tank_temperatures.append(Tank.temp_in)
     
-x = range(time_step) # time
+print("panel_vol =", panel_vol)
+print("panel_H20_mass =", panel_H20_mass)
+print("pipe_1_vol =", pipe_1_vol)
+print("pipe_2_vol =", pipe_2_vol)
+print("pipe_3_vol =", pipe_3_vol)
+print("pipe_1_H20_mass =", pipe_1_H20_mass)
+print("pipe_2_H20_mass =", pipe_2_H20_mass)
+print("pipe_3_H20_mass =", pipe_3_H20_mass)
+print("tank_H20_mass =", tank_H20_mass)
 
 # Create the plot
+x = range(time_step) # time
 fig, ax = plt.subplots()
-
 ax.plot(x, panel_temperatures, label='Panel Temp')
 ax.plot(x, tank_temperatures, label='Tank Temp')
 ax.set_title('Solar Water Heating Simulation')
 ax.set_xlabel('Time (sec)')
 ax.set_ylabel('Temperature (°C)')
-
 ax.legend()
 plt.show()
 
