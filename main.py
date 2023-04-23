@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 import compenents as comps
 
 # Constants
@@ -16,12 +17,12 @@ pipe_diameter = 0.02 # m
 tank_volume = 3 # m^3
 
 # Components
-Panel = comps.SolarPanel(panel_area, intial_temp, intial_temp, intial_Q, intial_Q) # solar water heating panel
-Pipe_1 = comps.Pipe(pipe_1_len, intial_temp, intial_temp, intial_Q, intial_Q) # piping between panel and pump
-Pump = comps.Pump(intial_temp,intial_temp, intial_Q, intial_Q) # circulation pump
-Pipe_2 = comps.Pipe(pipe_2_len, intial_temp, intial_temp, intial_Q, intial_Q) # piping between pump and tank 
-Tank = comps.StorageTank(tank_volume, intial_temp, intial_temp, intial_Q, intial_Q) # hot water storage
-Pipe_3 = comps.Pipe(pipe_3_len, intial_temp, intial_temp, intial_Q, intial_Q) # piping between tank and panel 
+Panel = comps.SolarPanel(panel_area, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # solar water heating panel
+Pipe_1 = comps.Pipe(pipe_1_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between panel and pump
+Pump = comps.Pump(intial_temp,intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # circulation pump
+Pipe_2 = comps.Pipe(pipe_2_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between pump and tank 
+Tank = comps.StorageTank(tank_volume, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # hot water storage
+Pipe_3 = comps.Pipe(pipe_3_len, pipe_diameter, intial_temp, intial_temp, intial_flow, intial_flow, intial_Q, intial_Q) # piping between tank and panel 
 
 # Lists to store simulation results
 panel_temperatures = []
@@ -39,10 +40,22 @@ time_step = hours * 3600 # seconds
 # Simulation loop
 for i in range(time_step):
     
-    Panel.Q_out += solar_irradiance * Panel.area * panel_efficiency
+    panel_temperatures.append(Panel.temp_out)
+    tank_temperatures.append(Tank.temp_in)
     
-    print('hi')
+x = range(time_step) # time
 
+# Create the plot
+fig, ax = plt.subplots()
+
+ax.plot(x, panel_temperatures, label='Panel Temp')
+ax.plot(x, tank_temperatures, label='Tank Temp')
+ax.set_title('Solar Water Heating Simulation')
+ax.set_xlabel('Time (sec)')
+ax.set_ylabel('Temperature (°C)')
+
+ax.legend()
+plt.show()
 
 # # Constants
 # solar_irradiance = 1000 # W/m^2
