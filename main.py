@@ -4,7 +4,7 @@ import numpy as np
 import compenents as comps
 
 # Constants
-solar_irradiance = 1000 # W/m^2
+max_solar_irradiance = 1000 # W/m^2
 panel_efficiency = 0.6 # 60% efficiency
 intial_temp = 20 # C
 intial_flow = 0.05 # m^3/s
@@ -34,19 +34,26 @@ pipe_1_H20_mass = Pipe_1.mass_fulid(rho_H20)
 pipe_2_H20_mass = Pipe_2.mass_fulid(rho_H20)
 pipe_3_H20_mass = Pipe_3.mass_fulid(rho_H20)
 tank_H20_mass = Tank.mass_fulid(rho_H20)
+panel_Q = max_solar_irradiance * panel_efficiency * Panel.area
 
 # Lists to store simulation results
 panel_temperatures = []
 tank_temperatures = []
+solar_irradiance = []
 
 # Simulation parameters
 hours = 24
 time_step = hours * 3600 # seconds
 
-
 # Simulation loop
 for i in range(time_step):
-    
+    if i < time_step/4 or i > 3*time_step/4:
+        I = 0
+    else:
+        t_max = time_step/4 # time of solar noon after sunrise (in seconds)
+        I = max_solar_irradiance * np.sin((2*np.pi/time_step)*(i-t_max))
+        
+    solar_irradiance.append(I)  
     panel_temperatures.append(Panel.temp_out)
     tank_temperatures.append(Tank.temp_in)
     
@@ -59,6 +66,11 @@ print("pipe_1_H20_mass =", pipe_1_H20_mass)
 print("pipe_2_H20_mass =", pipe_2_H20_mass)
 print("pipe_3_H20_mass =", pipe_3_H20_mass)
 print("tank_H20_mass =", tank_H20_mass)
+print("panel_Q =", panel_Q)
+
+
+
+
 
 # Create the plot
 x = range(time_step) # time
@@ -66,8 +78,16 @@ fig, ax = plt.subplots()
 ax.plot(x, panel_temperatures, label='Panel Temp')
 ax.plot(x, tank_temperatures, label='Tank Temp')
 ax.set_title('Solar Water Heating Simulation')
-ax.set_xlabel('Time (sec)')
+ax.set_xlabel('Time (s)')
 ax.set_ylabel('Temperature (°C)')
+
+ax2 = ax.twinx()
+
+color = 'tab:blue'
+ax2.set_ylabel('Irradiance (W/m^2)', color=color)
+ax2.plot(x, solar_irradiance, color=color)
+ax2.tick_params(axis='y', labelcolor=color)
+
 ax.legend()
 plt.show()
 
