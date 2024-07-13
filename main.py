@@ -8,7 +8,7 @@ import compenents as comps
 # component dimensions
 panel_volume = 1  # m^3
 tank_volume = 3  # m^3
-flow_rate = 0.5 # kg/s
+flow_rate = 0.01 # kg/s
 
 # Components
 panel_water = comps.Water(26.6667) # Outside ambient air temperature 80°F
@@ -19,7 +19,9 @@ tank = comps.Tank(tank_volume, tank_water)
 
 # Lists to store simulation results
 panel_temperatures = []
+panel_energy = []
 tank_temperatures = []
+tank_energy = []
 solar_energy = []
 
 # Simulation parameters
@@ -45,17 +47,20 @@ for i in range(time_step):
 
     # piping/moving the fluid
     # into the tank
-    # panel_tank_temp_delta = tank.fluid.temperature - panel.fluid.temperature
-    # energy_into_tank = tank.fluid.energy(panel_tank_temp_delta, flow_rate)
-    # print("energy into tank: ", energy_into_tank)
-    # print("p_t_delta: ", panel_tank_temp_delta)
-    # tank.fluid.update_temperature(energy_into_tank, flow_rate) 
-    # # out of the tank
-    # tank_panel_temp_delta =  panel.fluid.temperature - tank.fluid.temperature
-    # energy_out_of_tank = panel.fluid.energy(tank_panel_temp_delta, flow_rate)
-    # print("energy out of tank: ", energy_out_of_tank)
-    # print("t_p_delta: ", tank_panel_temp_delta)
-    # panel.fluid.update_temperature(energy_out_of_tank, flow_rate)
+    panel.volume -= flow_rate
+    panel_tank_temp_delta =  panel.fluid.temperature - tank.fluid.temperature
+    energy_into_tank = tank.fluid.energy(panel_tank_temp_delta, flow_rate)
+
+    tank.volume += flow_rate
+    tank.fluid.update_temperature(energy_into_tank, tank.fluid.mass(tank.volume))
+
+    # out of the tank
+    tank.volume -= flow_rate
+    tank_panel_temp_delta =   tank.fluid.temperature - panel.fluid.temperature
+    energy_out_of_tank = panel.fluid.energy(tank_panel_temp_delta, flow_rate)
+
+    panel.volume += flow_rate
+    panel.fluid.update_temperature(energy_out_of_tank, panel.fluid.mass(panel.volume))
 
 
 
@@ -64,7 +69,10 @@ for i in range(time_step):
     tank_temperatures.append(tank.fluid.temperature)
 
 
-# Create the plot
+
+
+
+############ Create the plot ##############
 x = range(time_step)  # time
 panel_color = "red"
 tank_color = "blue"
