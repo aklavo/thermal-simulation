@@ -21,8 +21,6 @@ class Water:
   def update_temperature(self, energy, mass):
     self.temperature += self.temperature_delta(energy, mass)
 
-  
-
 # ------------------------------- The Sun -------------------------------
 class Sun:
   def __init__(self):

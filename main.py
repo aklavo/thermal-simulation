@@ -8,7 +8,7 @@ import compenents as comps
 # component dimensions
 panel_volume = 1  # m^3
 tank_volume = 3  # m^3
-flow_rate = 0.01 # kg/s
+flow_rate = 0.005 # kg/s
 
 # Components
 panel_water = comps.Water(26.6667) # Outside ambient air temperature 80°F
@@ -63,15 +63,9 @@ for i in range(time_step):
     panel.volume += flow_rate
     panel.fluid.update_temperature(energy_out_of_tank, panel.fluid.mass(panel.volume))
 
-
-
     # store temperatures
     panel_temperatures.append(panel.fluid.temperature)
     tank_temperatures.append(tank.fluid.temperature)
-
-
-
-
 
 ############ Create the plot ##############
 x = range(time_step)  # time
