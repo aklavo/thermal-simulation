@@ -115,3 +115,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# helper files
+*.ipynb
+get_weather_csv.py

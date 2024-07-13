@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import compenents as comps
+import inputs
 
 # component dimensions
 panel_volume = 1  # m^3
@@ -25,19 +26,31 @@ tank_energy = []
 solar_energy = []
 
 # Simulation parameters
-hours = 80
-seconds_per_day = 24 * 3600  # seconds
-time_step = hours * 3600  # seconds
+year = '2022'
+lat = '39.8818'
+lon = '-105.0552'
+interval = '5'
+attributes = 'ghi,clearsky_ghi,air_temperature'
+
+weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes) # 5min data
+
+start = '2022-07-01 00:00:00'
+end = '2022-07-02 23:55:00'
+weather_df = weather_df.loc[start:end]
+weather_df = weather_df.resample('1s').interpolate()
+time_step = len(weather_df)  # seconds
+clouds = True # True = use GHI, False = use Clearsky GHI
 
 # Simulation loop in seconds
+print("Starting simulation...")
 for i in range(time_step):
-    if i % seconds_per_day < seconds_per_day/4 or i % seconds_per_day > 3 * seconds_per_day / 4:
-        sun.irradiance = 0
-    else:
-        t_max = seconds_per_day / 4  # time of solar noon after sunrise (in seconds)
-        sun.irradiance = sun.max_irradiance * math.sin((2 * math.pi / seconds_per_day) * (i - t_max))
 
-    # update components
+    # update sun
+    if clouds:
+        sun.irradiance = weather_df.iloc[i]['GHI']
+    else:
+        sun.irradiance = weather_df.iloc[i]['Clearsky GHI']
+
     solar_energy.append(sun.irradiance)
     # heat gain
     panel.fluid.update_temperature(sun.irradiance, panel.fluid.mass(panel.volume))
@@ -66,7 +79,7 @@ for i in range(time_step):
     # store temperatures
     panel_temperatures.append(panel.fluid.temperature)
     tank_temperatures.append(tank.fluid.temperature)
-
+print("Simulation complete!")
 ############ Create the plot ##############
 x = range(time_step)  # time
 panel_color = "red"
