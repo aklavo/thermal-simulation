@@ -24,12 +24,11 @@ class Water:
 # ------------------------------- The Sun -------------------------------
 class Sun:
   def __init__(self):
-    self.max_irradiance = 1000 # irradiance in W/m^2 or J/s*m^2
     self.irradiance = 0 # intal irradiance in W/m^2 or J/s*m^2
 
   def energy(self, time):
     return self.irradiance*time
-    
+# ------------------------------- Vessels -------------------------------    
 class Vessel:
   def __init__(self, volume, fluid):
     self.volume = volume
@@ -44,15 +43,16 @@ class Vessel:
 
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Vessel):
-  def __init__(self, volume, fluid):
-    self.volume = volume
+  def __init__(self, fluid, volume=1):
+    self.volume = volume # default is 1 m^3
     self.insulated = False
     self.fluid = fluid
+    self.efficiency = 0.7 # % of sunlight coverted to heat
 
  # ------------------------------- Water Tank -------------------------------   
 class Tank(Vessel):
-  def __init__(self, volume, fluid):
-    self.volume = volume
+  def __init__(self, fluid, volume=3):
+    self.volume = volume # default is 3 m^3
     self.insulated = True
     self.fluid = fluid
 
