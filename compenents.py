@@ -43,11 +43,14 @@ class Vessel:
 class SolarPanel(Vessel):
   def __init__(self, volume, fluid):
     self.volume = volume
+    self.insulated = False
+    self.fluid = fluid
+    
+class Tank(Vessel):
+  def __init__(self, volume, fluid):
+    self.volume = volume
     self.insulated = True
     self.fluid = fluid
-    self.area = 2 # m^2
-    
-    
 
 
 

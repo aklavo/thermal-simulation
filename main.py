@@ -16,17 +16,21 @@ intial_flow = 0.05  # m^3/s
 # pipe_2_len = 5 # m
 # pipe_3_len = 10 # m
 # pipe_diameter = 0.10 # inner diameter in meters
+panel_volume = 1  # m^3
 tank_volume = 3  # m^3
-# intial_Q = 0 # W (J/s)
+
 
 
 # Components
-water = comps.Water()
+panel_water = comps.Water()
+tank_water = comps.Water()
 sun = comps.Sun()
-solar_panel = comps.SolarPanel(3,water)
+solar_panel = comps.SolarPanel(panel_volume,panel_water)
+tank = comps.Tank(tank_volume, tank_water)
 
 # Lists to store simulation results
-water_temperatures = []
+panel_temperatures = []
+tank_temperatures = []
 solar_energy = []
 
 # Simulation parameters
@@ -45,30 +49,35 @@ for i in range(time_step):
     solar_energy.append(sun.irradiance)
     # heat gain
     solar_panel.fluid.update_temperature(sun.irradiance, solar_panel.fluid.mass(solar_panel.volume))
+    
     # heat loss
     solar_panel.fluid.temperature -= solar_panel.heat_loss()
-
-    water_temperatures.append(solar_panel.fluid.temperature)
+    tank.fluid.temperature -= tank.heat_loss()
+    panel_temperatures.append(solar_panel.fluid.temperature)
+    tank_temperatures.append(tank.fluid.temperature)
 
 
 # Create the plot
 x = range(time_step)  # time
-left_color = "blue"
-right_color = "red"
+panel_color = "red"
+tank_color = "blue"
+sun_color = "orange"
 fig, ax = plt.subplots()
-ax.plot(x, water_temperatures, label="Panel Fluid Temp", color = left_color)
+ax.plot(x, panel_temperatures, label="Panel Fluid Temp", color = panel_color)
+ax.plot(x, tank_temperatures, label="Tank Fluid Temp", color = tank_color)
 ax.set_title("Solar Water Heating Simulation")
 ax.set_xlabel("Time (s)")
-ax.set_ylabel("Temperature (°C)", color = left_color)
-ax.tick_params(axis="y", labelcolor=left_color)
+ax.set_ylabel("Temperature (°C)")
+ax.tick_params(axis="y")
 
 ax2 = ax.twinx()
 
-ax2.set_ylabel("Irradiance (W/m^2)", color = right_color)
-ax2.plot(x, solar_energy, color = right_color)
-ax2.tick_params(axis="y", labelcolor = right_color)
+ax2.set_ylabel("Irradiance (W/m^2)", color = sun_color)
+ax2.plot(x, solar_energy, label="Irradiance", color = sun_color)
+ax2.tick_params(axis="y", labelcolor = sun_color)
 
-ax.legend()
+ax.legend(loc="upper right")
+ax2.legend(loc="upper left")
 plt.show()
 
 # # Constants
