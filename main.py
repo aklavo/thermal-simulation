@@ -66,19 +66,19 @@ for i in range(sim_length):
     mass_fluid = flow_rate * sim_step_seconds 
 
     # into the tank
-    panel.volume -= flow_rate
+    panel.volume -= volume_fluid
     panel_tank_temp_delta =  panel.fluid.temperature - tank.fluid.temperature
-    energy_into_tank = tank.fluid.energy(panel_tank_temp_delta, flow_rate)
+    energy_into_tank = tank.fluid.energy(panel_tank_temp_delta, mass_fluid)
 
-    tank.volume += flow_rate
+    tank.volume += volume_fluid
     tank.fluid.update_temperature(energy_into_tank, tank.fluid.mass(tank.volume))
 
     # out of the tank
-    tank.volume -= flow_rate
+    tank.volume -= volume_fluid
     tank_panel_temp_delta =   tank.fluid.temperature - panel.fluid.temperature
-    energy_out_of_tank = panel.fluid.energy(tank_panel_temp_delta, flow_rate)
+    energy_out_of_tank = panel.fluid.energy(tank_panel_temp_delta, mass_fluid)
 
-    panel.volume += flow_rate
+    panel.volume += volume_fluid
     panel.fluid.update_temperature(energy_out_of_tank, panel.fluid.mass(panel.volume))
 
     # store temperatures and energies
