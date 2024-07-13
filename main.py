@@ -8,12 +8,13 @@ import compenents as comps
 # component dimensions
 panel_volume = 1  # m^3
 tank_volume = 3  # m^3
+flow_rate = 0.5 # kg/s
 
 # Components
-panel_water = comps.Water()
-tank_water = comps.Water()
+panel_water = comps.Water(26.6667) # Outside ambient air temperature 80°F
+tank_water = comps.Water(21.1111) # Inside ambient air temperature 70°F
 sun = comps.Sun()
-solar_panel = comps.SolarPanel(panel_volume,panel_water)
+panel = comps.SolarPanel(panel_volume,panel_water)
 tank = comps.Tank(tank_volume, tank_water)
 
 # Lists to store simulation results
@@ -36,14 +37,30 @@ for i in range(time_step):
     # update components
     solar_energy.append(sun.irradiance)
     # heat gain
-    solar_panel.fluid.update_temperature(sun.irradiance, solar_panel.fluid.mass(solar_panel.volume))
+    panel.fluid.update_temperature(sun.irradiance, panel.fluid.mass(panel.volume))
     
     # heat loss
-    solar_panel.fluid.temperature -= solar_panel.heat_loss()
+    panel.fluid.temperature -= panel.heat_loss()
     tank.fluid.temperature -= tank.heat_loss()
 
+    # piping/moving the fluid
+    # into the tank
+    # panel_tank_temp_delta = tank.fluid.temperature - panel.fluid.temperature
+    # energy_into_tank = tank.fluid.energy(panel_tank_temp_delta, flow_rate)
+    # print("energy into tank: ", energy_into_tank)
+    # print("p_t_delta: ", panel_tank_temp_delta)
+    # tank.fluid.update_temperature(energy_into_tank, flow_rate) 
+    # # out of the tank
+    # tank_panel_temp_delta =  panel.fluid.temperature - tank.fluid.temperature
+    # energy_out_of_tank = panel.fluid.energy(tank_panel_temp_delta, flow_rate)
+    # print("energy out of tank: ", energy_out_of_tank)
+    # print("t_p_delta: ", tank_panel_temp_delta)
+    # panel.fluid.update_temperature(energy_out_of_tank, flow_rate)
+
+
+
     # store temperatures
-    panel_temperatures.append(solar_panel.fluid.temperature)
+    panel_temperatures.append(panel.fluid.temperature)
     tank_temperatures.append(tank.fluid.temperature)
 
 

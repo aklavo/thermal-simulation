@@ -1,10 +1,10 @@
 import math
 # ------------------------------- Water -------------------------------
 class Water:
-  def __init__(self):
+  def __init__(self, temperature=20):
     self.density = 100 # density of water at 4°C(kg/m^3)
     self.specifc_heat = 4184 # specific heat of water at 20°C(J/kg*C)
-    self.temperature = 20 # initial temperature of water 20°C
+    self.temperature = temperature # initial temperature of water 20°C
 
   def mass(self, volume):
     return self.density*volume
@@ -15,8 +15,13 @@ class Water:
   def temperature_delta(self, energy, mass):
     return energy/self.specifc_heat/mass
   
+  def energy(self, temperature_delta, mass):
+    return temperature_delta*self.specifc_heat*mass
+  
   def update_temperature(self, energy, mass):
     self.temperature += self.temperature_delta(energy, mass)
+
+  
 
 # ------------------------------- The Sun -------------------------------
 class Sun:
@@ -39,13 +44,14 @@ class Vessel:
     else:
       return 0.0001 # J/s
 
-
+# ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Vessel):
   def __init__(self, volume, fluid):
     self.volume = volume
     self.insulated = False
     self.fluid = fluid
-    
+
+ # ------------------------------- Water Tank -------------------------------   
 class Tank(Vessel):
   def __init__(self, volume, fluid):
     self.volume = volume
