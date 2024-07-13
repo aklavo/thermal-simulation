@@ -25,16 +25,17 @@ tank_energy = []
 solar_energy = []
 
 # Simulation parameters
-hours = 24
+hours = 80
+seconds_per_day = 24 * 3600  # seconds
 time_step = hours * 3600  # seconds
 
 # Simulation loop in seconds
 for i in range(time_step):
-    if i < time_step / 4 or i > 3 * time_step / 4:
+    if i % seconds_per_day < seconds_per_day/4 or i % seconds_per_day > 3 * seconds_per_day / 4:
         sun.irradiance = 0
     else:
-        t_max = time_step / 4  # time of solar noon after sunrise (in seconds)
-        sun.irradiance = sun.max_irradiance * math.sin((2 * math.pi / time_step) * (i - t_max))
+        t_max = seconds_per_day / 4  # time of solar noon after sunrise (in seconds)
+        sun.irradiance = sun.max_irradiance * math.sin((2 * math.pi / seconds_per_day) * (i - t_max))
 
     # update components
     solar_energy.append(sun.irradiance)
