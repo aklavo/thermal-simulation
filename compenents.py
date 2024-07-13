@@ -53,33 +53,3 @@ class Tank(Vessel):
     self.fluid = fluid
 
 
-
-
-
-
-class Pump:
-  def __init__(self, temp_in, temp_out, flow_in, flow_out, Q_in, Q_out):
-    self.temp_in = temp_in
-    self.temp_out = temp_out
-    self.flow_in = flow_in
-    self.flow_out = flow_out
-    self.Q_in = Q_in
-    self.Q_out = Q_out  
-
-class Pipe:
-  def __init__(self, length, diameter, temp_in, temp_out, flow_in, flow_out, Q_in, Q_out):
-    self.length = length
-    self.diameter = diameter
-    self.temp_in = temp_in
-    self.temp_out = temp_out
-    self.flow_in = flow_in
-    self.flow_out = flow_out
-    self.Q_in = Q_in
-    self.Q_out = Q_out
-    
-  def volume(self):
-    return math.pi*self.length*(self.diameter/2)**2
-  
-  def mass_fulid(self, density_fuild):
-    return self.volume()*density_fuild
-
