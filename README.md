@@ -26,3 +26,5 @@ Execute the similation by running the command:
 `python main.py`  
 Displayed first in the console will be the results of the main simulation component parameters and the mass flow rate (m), pressure (p), enthalpy (e), and temperature (T) at all the connection locations. Refer to inline comments for connection locations. All units are in SI. Below this will be many simulations iterating over a range of ambient temperature and irradiance values necessary to produce the 3D plot of thermal efficiency. To kill the process simply exit the graphical pop-up window.
 
+## Notes
+The app.py is not functional atm.
