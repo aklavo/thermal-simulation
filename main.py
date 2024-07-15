@@ -8,9 +8,10 @@ import inputs
 
 def main():
     # System constants
-    flow_rate = 0.005 # [kg/s]
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
+    air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
+    air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
     panel_hieght = 0.1 # [m]
@@ -27,6 +28,8 @@ def main():
 
     # Components
     sun = comps.Sun()
+    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp)
+    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp)
     panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp)
     tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp) 
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
@@ -43,7 +46,9 @@ def main():
     # Lists to store simulation results
     panel_temperatures = []
     tank_temperatures = []
+    zone_air_temps = []
     solar_energy = []
+    heat_lossed = []
 
     # Weather parameters
     year = '2022'
@@ -56,7 +61,7 @@ def main():
 
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-03 23:55:00'
+    end = '2022-07-01 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -81,10 +86,6 @@ def main():
         # Solar energy into the panel
         energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
         panel.fluid.add_energy(energy_to_panel)
-        
-        # heat loss
-        #panel.fluid.temperature -= panel.heat_loss()
-        #tank.fluid.temperature -= tank.heat_loss()
 
         # Piping/moving the fluid
         supply_temp = panel.fluid.temperature
@@ -103,10 +104,32 @@ def main():
 
         panel.fluid.mix_with(return_hw)
         print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
+      
+        # Heat loss
+        outside_air.temperature = weather_df.iloc[i]['Temperature']
+        #heat_transferred_to_air = tank.conduction_loss(zone_air, sim_step_seconds)
+        print(f"Water Temp: {tank.fluid.temperature:.3f}")
+        print(f"Air Temp: {zone_air.temperature:.3f}")
+        print(f"Tank Thickness: {tank.material.thickness:.3f}")
+        print(f"Tank heat transfer coefficent: {tank.material.heat_transfer_coefficient:.3f}")
+        print(f"Tank Surface Area: {tank.surface_area():.3f}")
+        print(f"Time: {sim_step_seconds} s")
+        #print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
+        # (panel.conduction_loss(outside_air, sim_step_seconds) + 
+        #                           supply_pipe.conduction_loss(outside_air, sim_step_seconds) +
+        #                           tank.conduction_loss(zone_air, sim_step_seconds) +
+        #                           return_pipe.conduction_loss(outside_air, sim_step_seconds))
+        
+        #panel.fluid.add_energy(panel.conduction_loss(outside_air, sim_step_seconds))
+        #supply_pipe.fluid.add_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
+        #tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
+        #return_pipe.fluid.add_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
 
         # store temperatures and energies
         panel_temperatures.append(panel.fluid.temperature)
         tank_temperatures.append(tank.fluid.temperature)
+        #heat_lossed.append(heat_transferred_to_air)
+        zone_air_temps.append(zone_air.temperature)
         print("---------------------------------------")
         
         
@@ -118,6 +141,7 @@ def main():
     tank_color = "blue"
     sun_color = "orange"
     oat_color = "green"
+    heat_color = "black"
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
 
     # Temperature plot
@@ -137,9 +161,15 @@ def main():
 
     # Other plot
     ax2.plot(x, weather_df["Temperature"], label="Outside Air Temp", color=oat_color)
+    ax2.plot(x, zone_air_temps, label="Zone Air Temp", color=panel_color)
     ax2.set_xlabel("Time")
     ax2.set_ylabel("Temperature (°C)")
     ax2.legend(loc="upper right")
+    # ax2_twin = ax2.twinx()
+    # ax2_twin.plot(x, heat_lossed, label="Heat Lossed", color=heat_color)
+    # ax2_twin.set_xlabel("Time")
+    # ax2_twin.set_ylabel("Energy (J)")
+    # ax2_twin.legend(loc="upper left")
 
     plt.tight_layout()
     plt.show()

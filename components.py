@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 # Q = m * c * dT
 # T_f = ((m1*T1)+(m2*T2))/(m1 + m2)
 #
-# Conduction: Q = k * A * (T_hot - T_cold)^(t/d)
+# Conduction: Q = k * A * (T_hot - T_cold)/d
 # Convection: Q = h * A * (T_hot - T_cold)
 # Radiation: Q = sig * A*  (T_hot - T_cold)^4
 #################################################
@@ -34,6 +34,13 @@ class Fluid:
   # T2 = T1 + Q/mc
   def add_energy(self, energy):
     self.temperature += energy/(self.specific_heat*self.mass())
+  def lose_energy(self, energy):
+    print(f"Lost energy: {energy} J")
+    print(f"Temperaure Change: {energy/(self.specific_heat*self.mass())}")
+    if energy >0:
+      self.temperature -= energy/(self.specific_heat*self.mass())
+    else:
+      self.temperature += energy/(self.specific_heat*self.mass())
 
   # Heat lossed by fluid_1 + Heat gained by fluid_2 = 0
   def mix_with(self, fluid):
@@ -76,16 +83,19 @@ class Container(ABC):
   def surface_area(self):
     pass
     
-  def conduction_loss(self, material, fluid, time):
+  def conduction_loss(self, fluid_2, time):
     temp_1 = self.fluid.temperature
-    temp_2 = fluid.temperature
-    thickness = material.thickness
-    heat_transfer_coefficient = material.heat_transfer_coefficient
-    area = self.surface_area()
+    temp_2 = fluid_2.temperature
+    if abs(temp_1-temp_2) < 0.01:
+      return 0
+    else:
+      thickness = self.material.thickness
+      heat_transfer_coefficient = self.material.heat_transfer_coefficient
+      area = self.surface_area()
+      print(f"Conduction Loss: {area:.3f} * {heat_transfer_coefficient} * ({temp_1:.3f} - {temp_2:.3f})/ {thickness} * {time}")
+      heat_energy = (heat_transfer_coefficient*area*(temp_1-temp_2)/thickness)*time
 
-    heat_energy = heat_transfer_coefficient*area*(temp_1-temp_2)**(time/thickness)
-
-    return heat_energy
+      return heat_energy
   
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Container):
@@ -104,8 +114,10 @@ class SolarPanel(Container):
     left_right = 2*(self.length * self.height)
     front_back = 2*(self.width * self.height)
     return top_bottom + left_right + front_back
+  
+  def solar_area(self):
+    return self.length * self.width
     
-
  # ------------------------------- Water Tank -------------------------------   
 class Tank(Container):
   def __init__(self, fluid, material, radius, height):
