@@ -59,8 +59,8 @@ class Sun:
   def __init__(self):
     self.irradiance = 0 # intal irradiance in W/m^2 or J/s*m^2
 
-  def energy(self, time):
-    return self.irradiance*time
+  def energy(self, time, area):
+    return self.irradiance*time*area
   
 # ------------------------------- Containers -------------------------------    
 class Container(ABC):

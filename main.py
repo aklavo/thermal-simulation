@@ -79,7 +79,7 @@ def main():
         solar_energy.append(sun.irradiance)
 
         # Solar energy into the panel
-        energy_to_panel = sun.energy(sim_step_seconds)*panel.efficiency
+        energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
         panel.fluid.add_energy(energy_to_panel)
         
         # heat loss
