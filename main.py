@@ -73,7 +73,7 @@ def main():
 
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-01 23:55:00'
+    end = '2022-07-03 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -119,6 +119,11 @@ def main():
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
+        panel.simple_heat_loss(0.2)
+        supply_pipe.simple_heat_loss(0.1)
+        tank.simple_heat_loss(0.1)
+        return_pipe.simple_heat_loss(0.1)
+        
         #heat_transferred_to_air = tank.conduction_loss(zone_air, sim_step_seconds)
         print(f"Water Temp: {tank.fluid.temperature:.3f}")
         print(f"Air Temp: {zone_air.temperature:.3f}")

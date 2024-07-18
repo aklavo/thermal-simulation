@@ -92,6 +92,9 @@ class Container(ABC):
   @abstractmethod
   def surface_area(self):
     pass
+
+  def simple_heat_loss(self,temp_loss):
+    self.fluid.temperature -= temp_loss
     
   def conduction_loss(self, fluid_2, time):
     temp_1 = self.fluid.temperature
