@@ -109,6 +109,13 @@ class Container(ABC):
       heat_energy = (heat_transfer_coefficient*area*(temp_1-temp_2)/thickness)*time
 
       return heat_energy
+ 
+  def convection_loss(h, A, delta_T):
+      return h * A * delta_T
+  
+  def radiation_loss(epsilon, sigma, A, T_surface, T_environment):
+      return epsilon * sigma * A * (T_surface**4 - T_environment**4)
+
   
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Container):

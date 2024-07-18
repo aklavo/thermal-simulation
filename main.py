@@ -24,6 +24,7 @@ def main():
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
     air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
+    air_heat_transfer_coeff = 10 # heat transfer coefficient of air [W/m^2*K]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
     panel_hieght = 0.1 # [m]
@@ -123,7 +124,7 @@ def main():
         supply_pipe.simple_heat_loss(0.1)
         tank.simple_heat_loss(0.1)
         return_pipe.simple_heat_loss(0.1)
-        
+
         #heat_transferred_to_air = tank.conduction_loss(zone_air, sim_step_seconds)
         print(f"Water Temp: {tank.fluid.temperature:.3f}")
         print(f"Air Temp: {zone_air.temperature:.3f}")
