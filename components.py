@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+"""
+File: components.py
+Author: Andrew Klavekoske
+Last Updated: 2024-07-22
+
+Description: This file stores the classes for the components of the
+thermal simulation.
+"""
+
 import math
 from abc import ABC, abstractmethod
 #################################################

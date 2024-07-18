@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+
+"""
+File: main.py
+Author: Andrew Klavekoske
+Last Updated: 2024-07-22
+
+Description: Physics-based thermal simulation of a solar
+hot water panel and storage tank.
+"""
+
+
 import matplotlib
 
 matplotlib.use("TkAgg") # To show plots in Ubuntu
