@@ -20,7 +20,7 @@ import inputs
 
 def main():
     # System constants
-    flow_rate = 0.006 # [m^3/s]
+    flow_rate = 0.0063 # [m^3/s] ~100gpm
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
@@ -62,7 +62,7 @@ def main():
     tank_temperatures = []
     zone_air_temps = []
     solar_energy = []
-    heat_lossed = []
+    heat_loss = []
 
     # Weather parameters
     year = '2022'
@@ -75,7 +75,7 @@ def main():
     
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-03 23:15:00'
+    end = '2022-07-03 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -121,15 +121,12 @@ def main():
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
-        # panel.simple_heat_loss(0.2)
-        # supply_pipe.simple_heat_loss(0.1)
-        # tank.simple_heat_loss(0.1)
-        # return_pipe.simple_heat_loss(0.1)
-        panel.conduction_loss(outside_air, sim_step_seconds) 
-        supply_pipe.conduction_loss(outside_air, sim_step_seconds)
-        tank.conduction_loss(zone_air, sim_step_seconds)
-        return_pipe.conduction_loss(outside_air, sim_step_seconds)
-        
+        #pnael heat loss blows up simulation
+        #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
+        supply_pipe.fluid.lose_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
+        tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
+        return_pipe.fluid.lose_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
+
         heat_transferred_to_air = (tank.conduction_loss(zone_air, sim_step_seconds)+
                                    supply_pipe.conduction_loss(outside_air, sim_step_seconds)+
                                    return_pipe.conduction_loss(outside_air, sim_step_seconds))
@@ -137,16 +134,11 @@ def main():
         print(f"Sim timestep: {sim_step_seconds} s")
         print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
         
-        #pnael heat loss blows up simulation
-        #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
-        supply_pipe.fluid.lose_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
-        tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
-        return_pipe.fluid.lose_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
-
+        
         # store temperatures and energies
         panel_temperatures.append(panel.fluid.temperature)
         tank_temperatures.append(tank.fluid.temperature)
-        heat_lossed.append(heat_transferred_to_air)
+        heat_loss.append(heat_transferred_to_air)
         zone_air_temps.append(zone_air.temperature)
         print("---------------------------------------")
         
@@ -184,7 +176,7 @@ def main():
     ax2.set_ylabel("Temperature (°C)")
     ax2.legend(loc="upper right")
     ax2_twin = ax2.twinx()
-    ax2_twin.plot(x, heat_lossed, label="Heat Lossed", color=heat_color)
+    ax2_twin.plot(x, heat_loss, label="Heat Lost", color=heat_color)
     ax2_twin.set_xlabel("Time")
     ax2_twin.set_ylabel("Energy (J)")
     ax2_twin.legend(loc="upper left")

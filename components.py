@@ -44,10 +44,10 @@ class Fluid:
   # T2 = T1 + Q/mc
   def add_energy(self, energy):
     self.temperature += energy/(self.specific_heat*self.mass())
+
   def lose_energy(self, energy):
-    print(f"Lost energy: {energy} J")
     print(f"Temperaure Change: {energy/(self.specific_heat*self.mass())}")
-    if energy >0:
+    if energy > 0:
       self.temperature -= energy/(self.specific_heat*self.mass())
     else:
       self.temperature += energy/(self.specific_heat*self.mass())
@@ -108,7 +108,7 @@ class Container(ABC):
       #print(f"Conduction Loss: {area:.3f} * {heat_transfer_coefficient} * ({temp_1:.3f} - {temp_2:.3f})/ {thickness} * {time}")
       heat_energy = (heat_transfer_coefficient*area*(temp_1-temp_2)/thickness)*time
 
-    return heat_energy
+    return heat_energy  #if + self.temp is hotter, if - fluid2.temp is hotter
  
   def convection_loss(h, A, delta_T):
       return h * A * delta_T
