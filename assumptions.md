@@ -18,3 +18,6 @@
 ### Operational Assumptions
 - The pump is sized such that it can overcome the system head and produce the constant flow defined.
 - The speed of the pump is constant and instantaneous.
+
+### Simulation Assumptions
+- Above a timestep of ~2min the conduction heat loss blows up this simulation. 

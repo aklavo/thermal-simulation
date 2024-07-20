@@ -20,6 +20,7 @@ import inputs
 
 def main():
     # System constants
+    flow_rate = 0.006 # [m^3/s]
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
@@ -69,12 +70,12 @@ def main():
     lon = '-105.0552'
     interval = '5'
     attributes = 'ghi,clearsky_ghi,air_temperature'
-    sim_step = '5min'
+    sim_step = '1min'
     weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
-
+    
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-03 23:55:00'
+    end = '2022-07-03 23:15:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -103,50 +104,49 @@ def main():
         # Piping/moving the fluid
         supply_temp = panel.fluid.temperature
         supply_hw = comps.Fluid(water_density, water_specific_heat, supply_temp)
-        supply_pipe = comps.Pipe(supply_hw, copper_pipe, 0.02, 5)
+        supply_pipe = comps.Pipe(supply_hw, copper_pipe, 0.02, 1)
         supply_pipe.fluid.add_container(supply_pipe)
 
         return_temp = tank.fluid.temperature
         return_hw = comps.Fluid(water_density, water_specific_heat, return_temp)
-        return_pipe = comps.Pipe(return_hw, copper_pipe, 0.02, 5)
+        return_pipe = comps.Pipe(return_hw, copper_pipe, 0.02, 1)
         return_pipe.fluid.add_container(return_pipe)
         
         # Update Tank and Panel temperatures
-        tank.fluid.mix_with(supply_hw)
-        print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.3f}")
+        tank.fluid.mix_with(supply_hw, flow_rate, sim_step_seconds)
+        #print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.3f}")
 
-        panel.fluid.mix_with(return_hw)
-        print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
+        panel.fluid.mix_with(return_hw, flow_rate, sim_step_seconds)
+        #print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
-        panel.simple_heat_loss(0.2)
-        supply_pipe.simple_heat_loss(0.1)
-        tank.simple_heat_loss(0.1)
-        return_pipe.simple_heat_loss(0.1)
-
-        #heat_transferred_to_air = tank.conduction_loss(zone_air, sim_step_seconds)
-        print(f"Water Temp: {tank.fluid.temperature:.3f}")
-        print(f"Air Temp: {zone_air.temperature:.3f}")
-        print(f"Tank Thickness: {tank.material.thickness:.3f}")
-        print(f"Tank heat transfer coefficent: {tank.material.heat_transfer_coefficient:.3f}")
-        print(f"Tank Surface Area: {tank.surface_area():.3f}")
-        print(f"Time: {sim_step_seconds} s")
-        #print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
-        # (panel.conduction_loss(outside_air, sim_step_seconds) + 
-        #                           supply_pipe.conduction_loss(outside_air, sim_step_seconds) +
-        #                           tank.conduction_loss(zone_air, sim_step_seconds) +
-        #                           return_pipe.conduction_loss(outside_air, sim_step_seconds))
+        # panel.simple_heat_loss(0.2)
+        # supply_pipe.simple_heat_loss(0.1)
+        # tank.simple_heat_loss(0.1)
+        # return_pipe.simple_heat_loss(0.1)
+        panel.conduction_loss(outside_air, sim_step_seconds) 
+        supply_pipe.conduction_loss(outside_air, sim_step_seconds)
+        tank.conduction_loss(zone_air, sim_step_seconds)
+        return_pipe.conduction_loss(outside_air, sim_step_seconds)
         
-        #panel.fluid.add_energy(panel.conduction_loss(outside_air, sim_step_seconds))
-        #supply_pipe.fluid.add_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
-        #tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
-        #return_pipe.fluid.add_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
+        heat_transferred_to_air = (tank.conduction_loss(zone_air, sim_step_seconds)+
+                                   supply_pipe.conduction_loss(outside_air, sim_step_seconds)+
+                                   return_pipe.conduction_loss(outside_air, sim_step_seconds))
+        print(f"Water Temp: {tank.fluid.temperature:.3f}")
+        print(f"Sim timestep: {sim_step_seconds} s")
+        print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
+        
+        #pnael heat loss blows up simulation
+        #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
+        supply_pipe.fluid.lose_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
+        tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
+        return_pipe.fluid.lose_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
 
         # store temperatures and energies
         panel_temperatures.append(panel.fluid.temperature)
         tank_temperatures.append(tank.fluid.temperature)
-        #heat_lossed.append(heat_transferred_to_air)
+        heat_lossed.append(heat_transferred_to_air)
         zone_air_temps.append(zone_air.temperature)
         print("---------------------------------------")
         
@@ -183,11 +183,11 @@ def main():
     ax2.set_xlabel("Time")
     ax2.set_ylabel("Temperature (°C)")
     ax2.legend(loc="upper right")
-    # ax2_twin = ax2.twinx()
-    # ax2_twin.plot(x, heat_lossed, label="Heat Lossed", color=heat_color)
-    # ax2_twin.set_xlabel("Time")
-    # ax2_twin.set_ylabel("Energy (J)")
-    # ax2_twin.legend(loc="upper left")
+    ax2_twin = ax2.twinx()
+    ax2_twin.plot(x, heat_lossed, label="Heat Lossed", color=heat_color)
+    ax2_twin.set_xlabel("Time")
+    ax2_twin.set_ylabel("Energy (J)")
+    ax2_twin.legend(loc="upper left")
 
     plt.tight_layout()
     plt.show()
