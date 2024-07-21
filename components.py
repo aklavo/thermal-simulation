@@ -46,13 +46,13 @@ class Fluid:
     self.temperature += energy/(self.specific_heat*self.mass())
 
   def lose_energy(self, energy):
-    print(f"Temperaure Change: {energy/(self.specific_heat*self.mass())}")
+    print(f"Temperaure Change: {energy/(self.specific_heat*self.mass()):.3f}")
     if energy > 0:
       self.temperature -= energy/(self.specific_heat*self.mass())
     else:
       self.temperature += energy/(self.specific_heat*self.mass())
 
-  # Heat lossed by fluid_1 + Heat gained by fluid_2 = 0
+  # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
   def mix_with(self, fluid, flow_rate, time):
     mass_1 = self.mass()
     mass_2 = fluid.density*flow_rate*time
@@ -61,8 +61,10 @@ class Fluid:
     temp_2 = fluid.temperature
 
     # update both fluid temperature to final temperatre
-    self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3)  
-    fluid.temperature = self.temperature  
+    if flow_rate > 0:
+      self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3)
+      fluid.temperature = self.temperature
+      return 
 
 # ------------------------------- Surfaces -------------------------------
 class Material:
@@ -105,10 +107,8 @@ class Container(ABC):
       thickness = self.material.thickness
       heat_transfer_coefficient = self.material.heat_transfer_coefficient
       area = self.surface_area()
-      #print(f"Conduction Loss: {area:.3f} * {heat_transfer_coefficient} * ({temp_1:.3f} - {temp_2:.3f})/ {thickness} * {time}")
       heat_energy = (heat_transfer_coefficient*area*(temp_1-temp_2)/thickness)*time
-
-    return heat_energy  #if + self.temp is hotter, if - fluid2.temp is hotter
+    return heat_energy
  
   def convection_loss(h, A, delta_T):
       return h * A * delta_T

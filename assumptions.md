@@ -3,7 +3,9 @@
 ### Basic Assumptions
 - The storage tank is a perfect cylinder.
 - The panel is a rectangle of water. 
-- The flow of a pump is modelled based on the transfer of energy through fluid mixing.
+- The flow of a pump is modelled based on the transfer of energy through fluid mixing and
+a flow rate.
+- All pipe surface area is within the indoor environment. 
 
 ### Thermodynamic Assumptions
 - The tank is in thermal equalibrium with the indoor zone temperature at sim start.

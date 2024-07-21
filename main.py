@@ -31,31 +31,41 @@ def main():
     panel_hieght = 0.1 # [m]
     tank_radius = 0.5 # [m]
     tank_height = 2 # [m]
+    pipe_radius = 0.02 # [m]
+    pipe_length = 3 # [m]
     sigma = 5.670367e-8 # Stefan-Boltzmann constant [W/m^2*K^4]
     k_stainless_steal = 17 # Thermal conductivity of stainless steel [W/m*K]
     k_glass = 1 # Thermal conductivity of glass [W/m*K]
-    k_copper = 401 # Thermal conductivity of copper [W/m*K]
+    k_copper = 4#01 # Thermal conductivity of copper [W/m*K]
 
-    # System intial conditions
+    # Ambient air intial conditions
     oa_temp = 26.6667 # [°C] Outside ambient air temperature 80°F
     zone_temp = 21.111 # [°C] Inside ambient air temperature 70°F
 
-    # Components
-    sun = comps.Sun()
-    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp)
-    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp)
-    panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp)
-    tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp) 
+    # Initialize Components
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
     panel_glass = comps.Material(k_glass, oa_temp, 0.01)
     copper_pipe = comps.Material(k_copper, zone_temp, 0.005)
 
+    sun = comps.Sun()
+
+    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp)
+    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp)
+    panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp)
+    supply_hw = comps.Fluid(water_density, water_specific_heat, zone_temp)
+    tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp) 
+    return_hw = comps.Fluid(water_density, water_specific_heat, zone_temp)
+
     panel = comps.SolarPanel(panel_water, panel_glass, panel_length, panel_width, panel_hieght)
+    supply_pipe = comps.Pipe(supply_hw, copper_pipe, pipe_radius, pipe_length)
     tank = comps.Tank(tank_water, tank_stainless_steal, tank_radius, tank_height)
+    return_pipe = comps.Pipe(return_hw, copper_pipe, pipe_radius, pipe_length)
 
     # Put Water in containers
     panel.fluid.add_container(panel)
+    supply_pipe.fluid.add_container(supply_pipe)
     tank.fluid.add_container(tank)
+    return_pipe.fluid.add_container(return_pipe)
 
     # Lists to store simulation results
     panel_temperatures = []
@@ -75,7 +85,7 @@ def main():
     
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-03 23:55:00'
+    end = '2022-07-01 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -86,8 +96,10 @@ def main():
     for i in range(sim_length):
         print(f"Time: {weather_df.index[i]}")
         print(f"Panel Fluid Temp before heat transfer: {panel.fluid.temperature:.3f}")
+        print(f"Supply Pipe Fluid Temp before heat transfer: {supply_pipe.fluid.temperature:.3f}")
         print(f"Tank Fluid Temp before heat transfer: {tank.fluid.temperature:.3f}")
-        # Store sun energy
+        print(f"Return Pipe Fluid Temp before heat transfer: {return_pipe.fluid.temperature:.3f}")
+        # Update sun energy
         if clouds == 1:
             sun.irradiance = weather_df.iloc[i]['GHI']
         elif clouds == -1:
@@ -95,47 +107,39 @@ def main():
         else:
             sun.irradiance = 0
 
-        solar_energy.append(sun.irradiance)
-
-        # Solar energy into the panel
+        # Add solar energy into the panel
         energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
         panel.fluid.add_energy(energy_to_panel)
 
-        # Piping/moving the fluid
-        supply_temp = panel.fluid.temperature
-        supply_hw = comps.Fluid(water_density, water_specific_heat, supply_temp)
-        supply_pipe = comps.Pipe(supply_hw, copper_pipe, 0.02, 1)
-        supply_pipe.fluid.add_container(supply_pipe)
-
-        return_temp = tank.fluid.temperature
-        return_hw = comps.Fluid(water_density, water_specific_heat, return_temp)
-        return_pipe = comps.Pipe(return_hw, copper_pipe, 0.02, 1)
-        return_pipe.fluid.add_container(return_pipe)
-        
-        # Update Tank and Panel temperatures
-        tank.fluid.mix_with(supply_hw, flow_rate, sim_step_seconds)
-        #print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.3f}")
-
-        panel.fluid.mix_with(return_hw, flow_rate, sim_step_seconds)
-        #print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
+        # Move and mix the fluids - This updates all comp fluid temps
+        supply_pipe.fluid.mix_with(panel.fluid, flow_rate, sim_step_seconds)
+        tank.fluid.mix_with(supply_pipe.fluid, flow_rate, sim_step_seconds)
+        return_pipe.fluid.mix_with(tank.fluid, flow_rate, sim_step_seconds)
+        panel.fluid.mix_with(return_pipe.fluid, flow_rate, sim_step_seconds)
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
-        #pnael heat loss blows up simulation
+        #panel heat loss blows up simulation
         #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
-        supply_pipe.fluid.lose_energy(supply_pipe.conduction_loss(outside_air, sim_step_seconds))
-        tank.fluid.lose_energy(tank.conduction_loss(zone_air, sim_step_seconds))
-        return_pipe.fluid.lose_energy(return_pipe.conduction_loss(outside_air, sim_step_seconds))
+        supply_pipe_cond_loss = supply_pipe.conduction_loss(zone_air, sim_step_seconds)
+        tank_cond_loss = tank.conduction_loss(zone_air, sim_step_seconds)
+        return_pipe_cond_loss = return_pipe.conduction_loss(zone_air, sim_step_seconds)
+        supply_pipe.fluid.lose_energy(supply_pipe_cond_loss)
+        tank.fluid.lose_energy(tank_cond_loss)
+        return_pipe.fluid.lose_energy(return_pipe_cond_loss)
 
-        heat_transferred_to_air = (tank.conduction_loss(zone_air, sim_step_seconds)+
-                                   supply_pipe.conduction_loss(outside_air, sim_step_seconds)+
-                                   return_pipe.conduction_loss(outside_air, sim_step_seconds))
-        print(f"Water Temp: {tank.fluid.temperature:.3f}")
+        heat_transferred_to_air = (supply_pipe_cond_loss + tank_cond_loss + return_pipe_cond_loss)
+
+        
         print(f"Sim timestep: {sim_step_seconds} s")
-        print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
+        print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
+        print(f"Supply Pipe Fluid Temp after heat transfer: {supply_pipe.fluid.temperature:.3f}")
+        print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.3f}")
+        print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.3f}")
         
         
         # store temperatures and energies
+        solar_energy.append(sun.irradiance)
         panel_temperatures.append(panel.fluid.temperature)
         tank_temperatures.append(tank.fluid.temperature)
         heat_loss.append(heat_transferred_to_air)
