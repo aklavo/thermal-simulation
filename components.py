@@ -93,17 +93,16 @@ class Container(ABC):
     pass
 
   @abstractmethod
-  def overall_heat_transfer_coefficient(self):
+  def overall_UA(self):
     pass
 
   def temp_loss(self,temp_loss):
     self.fluid.temperature -= temp_loss # used to simulate simple heat loss
 
-  def heat_loss(self, surface_area, time):
+  def heat_loss(self, time):
 
     heat_loss = ((self.fluid.temperature - self.surroundings.temperature) *
-                 surface_area *
-                 self.overall_heat_transfer_coefficient(self.surroundings) *
+                 self.overall_UA(self.surroundings) *
                  time)
 
     return heat_loss
@@ -133,13 +132,14 @@ class SolarPanel(Container):
   def solar_area(self):
     return self.length * self.width
   
-  def overall_heat_transfer_coefficient(self, air: Fluid):
+  def overall_UA(self, air: Fluid):
     fluid_term = 1/self.fluid.heat_transfer_coefficient
     material_term = self.material.thickness/self.material.thermal_conductivity
     air_term = 1/air.heat_transfer_coefficient
 
-    overall_heat_transfer_coefficient = (fluid_term + material_term  + air_term)
-    return overall_heat_transfer_coefficient
+    overall_UA = (fluid_term + material_term  + air_term) * self.surface_area()
+
+    return overall_UA
     
 # ------------------------------- Water Tank -------------------------------   
 class Tank(Container):
@@ -171,24 +171,25 @@ class Tank(Container):
     return (self.radius + self.material.thickness + self.insulation.thickness) * 2
   
   # just tank walls
-  def overall_heat_transfer_coefficient(self, air: Fluid):
+  def overall_UA(self, air: Fluid):
 
     wall_fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
     wall_material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
     wall_insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
     wall_air_term = 1/air.heat_transfer_coefficient
 
-    # top_fluid_term = 1/self.fluid.heat_transfer_coefficient
-    # top_material_term = self.material.thickness/self.material.thermal_conductivity
-    # top_insulation_term = self.insulation.thickness/self.insulation.thermal_conductivity
-    # top_air_term = 1/air.heat_transfer_coefficient
+    top_fluid_term = 1/self.fluid.heat_transfer_coefficient
+    top_material_term = self.material.thickness/self.material.thermal_conductivity
+    top_insulation_term = self.insulation.thickness/self.insulation.thermal_conductivity
+    top_air_term = 1/air.heat_transfer_coefficient
 
-    side_h = 1/(wall_fluid_term + wall_material_term + wall_insulation_term + wall_air_term)
-    #top_h = 1/(top_fluid_term + top_material_term + top_insulation_term + top_air_term)
+    wall_U = 1/(wall_fluid_term + wall_material_term + wall_insulation_term + wall_air_term)
+    top_U = 1/(top_fluid_term + top_material_term + top_insulation_term + top_air_term)
 
-    overall_heat_transfer_coefficient = side_h #+ top_h
+    overall_UA = (((wall_U*self.surface_area_walls())+(top_U*self.surface_area_top()))/
+                  (self.surface_area_walls() + self.surface_area_top()))
 
-    return overall_heat_transfer_coefficient
+    return overall_UA
     
 # ------------------------------- Pipe --------------------------------------   
 class Pipe(Container):
@@ -217,14 +218,14 @@ class Pipe(Container):
     return (self.radius + self.material.thickness + self.insulation.thickness) * 2
 
 
-  def overall_heat_transfer_coefficient(self, air: Fluid):
+  def overall_UA(self, air: Fluid):
     # diameter ratios are necessary to correctly account for the cylindrical geometry and the logarithmic nature of radial heat conduction
     fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
     material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
     insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
     air_term = 1/air.heat_transfer_coefficient
 
-    overall_heat_transfer_coefficient = 1/(fluid_term + material_term + insulation_term + air_term)
+    overall_UA = (1/(fluid_term + material_term + insulation_term + air_term))*self.surface_area()
 
-    return overall_heat_transfer_coefficient
+    return overall_UA
    

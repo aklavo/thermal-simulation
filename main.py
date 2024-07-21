@@ -127,11 +127,11 @@ def main():
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
         #panel heat loss blows up simulation
-        panel_heat_loss = panel.heat_loss(panel.surface_area(), sim_step_seconds)
-        tank_heat_loss = (tank.heat_loss(tank.surface_area_walls(), sim_step_seconds))
+        panel_heat_loss = panel.heat_loss(sim_step_seconds)
+        tank_heat_loss = (tank.heat_loss(sim_step_seconds))
 
-        supply_pipe_heat_loss = supply_pipe.heat_loss(supply_pipe.surface_area(), sim_step_seconds)
-        return_pipe_heat_loss = return_pipe.heat_loss(return_pipe.surface_area(), sim_step_seconds)
+        supply_pipe_heat_loss = supply_pipe.heat_loss(sim_step_seconds)
+        return_pipe_heat_loss = return_pipe.heat_loss(sim_step_seconds)
 
         panel.fluid.lose_energy(panel_heat_loss)    
         supply_pipe.fluid.lose_energy(supply_pipe_heat_loss)
