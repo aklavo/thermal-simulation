@@ -133,8 +133,13 @@ class SolarPanel(Container):
   def solar_area(self):
     return self.length * self.width
   
-  def overall_heat_transfer_coefficient(self):
-    pass
+  def overall_heat_transfer_coefficient(self, air: Fluid):
+    fluid_term = 1/self.fluid.heat_transfer_coefficient
+    material_term = self.material.thickness/self.material.thermal_conductivity
+    air_term = 1/air.heat_transfer_coefficient
+
+    overall_heat_transfer_coefficient = (fluid_term + material_term  + air_term)
+    return overall_heat_transfer_coefficient
     
 # ------------------------------- Water Tank -------------------------------   
 class Tank(Container):

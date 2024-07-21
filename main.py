@@ -27,7 +27,8 @@ def main():
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
     air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
-    air_heat_transfer_coeff = 10 # heat transfer coefficient of air [W/m^2*K]
+    air_heat_transfer_coeff_inside = 10 # heat transfer coefficient of air [W/m^2*K]
+    air_heat_transfer_coeff_outside = 100 # heat transfer coefficient of air [W/m^2*K]
     water_in_pipe_heat_transfer_coeff =  1000 # heat transfer coefficient of water in pipe [W/m^2*K]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
@@ -54,8 +55,8 @@ def main():
 
     sun = comps.Sun()
 
-    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff)
-    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff)
+    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff_outside)
+    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff_inside)
     panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
     supply_hw = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
     tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
@@ -126,12 +127,13 @@ def main():
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
         #panel heat loss blows up simulation
-        #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
+        panel_heat_loss = panel.heat_loss(panel.surface_area(), sim_step_seconds)
         tank_heat_loss = (tank.heat_loss(tank.surface_area_walls(), sim_step_seconds))
 
         supply_pipe_heat_loss = supply_pipe.heat_loss(supply_pipe.surface_area(), sim_step_seconds)
         return_pipe_heat_loss = return_pipe.heat_loss(return_pipe.surface_area(), sim_step_seconds)
 
+        panel.fluid.lose_energy(panel_heat_loss)    
         supply_pipe.fluid.lose_energy(supply_pipe_heat_loss)
         tank.fluid.lose_energy(tank_heat_loss)
         return_pipe.fluid.lose_energy(return_pipe_heat_loss)
