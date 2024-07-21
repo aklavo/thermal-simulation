@@ -11,14 +11,16 @@ hot water panel and storage tank.
 
 
 import matplotlib
-
 matplotlib.use("TkAgg") # To show plots in Ubuntu
 import matplotlib.pyplot as plt
 import components as comps
 import inputs
+import pandas as pd
 
 
 def main():
+    DEV = True # True for development, False for production (saves outputs)
+    # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
     flow_rate = 0.0063 # [m^3/s] ~100gpm
     water_density = 100 # density of water at 4°C [kg/m^3]
@@ -91,6 +93,7 @@ def main():
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
     clouds = 1 # 1 = use GHI, -1 = use Clearsky GHI, 0 = no sun
 
+    # ---------------------------------------------- Simulation ------------------------------------------------
     # Simulation loop in seconds
     print(f"Starting simulation at {sim_step} intervals...")
     for i in range(sim_length):
@@ -149,7 +152,7 @@ def main():
         
     print("Simulation complete!")
 
-    ############ Create the plot ##############
+    # ------------------------------------------------ Outputs --------------------------------------------------
     x = weather_df.index  # time
     panel_color = "red"
     tank_color = "blue"
@@ -186,7 +189,18 @@ def main():
     ax2_twin.legend(loc="upper left")
 
     plt.tight_layout()
-    plt.show()
+    if DEV:
+        plt.show()
+    else:
+        plt.savefig("thermal-simulation.png")
+        df = pd.DataFrame({"Time": x,
+                        "Irradiance": solar_energy,
+                        "Outside Air Temp": weather_df["Temperature"],
+                        "Zone Air Temp": zone_air_temps,
+                        "Panel Temp": panel_temperatures,
+                        "Tank Temp": tank_temperatures,
+                        "Heat Loss": heat_loss})
+        df.to_csv("thermal-simulation.csv", index=False)
 
 
 if __name__ == "__main__":
