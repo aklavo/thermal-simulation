@@ -22,12 +22,12 @@ from abc import ABC, abstractmethod
 
 # ------------------------------- Fluids -------------------------------
 class Fluid:
-  def __init__(self,density, specific_heat, temperature=20, container=None):
+  def __init__(self, density, specific_heat, temperature=20, container=None, heat_transfer_coefficient=None):
     self.density = density
     self.specific_heat = specific_heat
     self.temperature = temperature # initial temperature of water 20°C
     self.container = container # container object if fluid is in a container
-
+    self.heat_transfer_coefficient = heat_transfer_coefficient
 
   def volume(self):
     return self.container.volume() if self.container else 0
@@ -68,8 +68,8 @@ class Fluid:
 
 # ------------------------------- Surfaces -------------------------------
 class Material:
-  def __init__(self, heat_transfer_coefficient, surface_temperature, thickness):
-    self.heat_transfer_coefficient = heat_transfer_coefficient
+  def __init__(self, thermal_conductivity, surface_temperature, thickness):
+    self.thermal_conductivity = thermal_conductivity
     self.surface_temperature = surface_temperature 
     self.thickness = thickness
 
@@ -83,35 +83,30 @@ class Sun:
   
 # ------------------------------- Containers -------------------------------    
 class Container(ABC):
-  def __init__(self, fluid, material):
+  def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid):
     self.fluid = fluid
     self.material = material
+    self.surroundings = surroundings # another fluid object (air)
 
   @abstractmethod
   def volume(self):
     pass
 
   @abstractmethod
-  def surface_area(self):
+  def overall_heat_transfer_coefficient(self):
     pass
 
-  def simple_heat_loss(self,temp_loss):
-    self.fluid.temperature -= temp_loss
-    
-  def conduction_loss(self, fluid_2, time):
-    temp_1 = self.fluid.temperature
-    temp_2 = fluid_2.temperature
-    if abs(temp_1-temp_2) < 0.01:
-      return 0
-    else:
-      thickness = self.material.thickness
-      heat_transfer_coefficient = self.material.heat_transfer_coefficient
-      area = self.surface_area()
-      heat_energy = (heat_transfer_coefficient*area*(temp_1-temp_2)/thickness)*time
-    return heat_energy
- 
-  def convection_loss(h, A, delta_T):
-      return h * A * delta_T
+  def temp_loss(self,temp_loss):
+    self.fluid.temperature -= temp_loss # used to simulate simple heat loss
+
+  def heat_loss(self, surface_area, time):
+
+    heat_loss = ((self.fluid.temperature - self.surroundings.temperature) *
+                 surface_area *
+                 self.overall_heat_transfer_coefficient(self.surroundings) *
+                 time)
+
+    return heat_loss
   
   def radiation_loss(epsilon, sigma, A, T_surface, T_environment):
       return epsilon * sigma * A * (T_surface**4 - T_environment**4)
@@ -119,8 +114,8 @@ class Container(ABC):
   
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Container):
-  def __init__(self, fluid, material, length, width, hieght):
-    super().__init__(fluid, material)
+  def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid, length, width, hieght):
+    super().__init__(fluid, material, surroundings)
     self.length = length
     self.width = width
     self.height = hieght
@@ -137,31 +132,94 @@ class SolarPanel(Container):
   
   def solar_area(self):
     return self.length * self.width
+  
+  def overall_heat_transfer_coefficient(self):
+    pass
     
- # ------------------------------- Water Tank -------------------------------   
+# ------------------------------- Water Tank -------------------------------   
 class Tank(Container):
-  def __init__(self, fluid, material, radius, height):
-    super().__init__(fluid, material)
+  def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid, radius, height,  insulation: Material):
+    super().__init__(fluid, material, surroundings)
     self.radius = radius
     self.height = height
+    self.insulation = insulation
 
   def volume(self):
     return math.pi*self.height*self.radius**2
   
-  def surface_area(self):
-    return (2*math.pi*self.radius**2)+(2*math.pi*self.radius*self.height)
+  def surface_area_walls(self):
+    return (2*math.pi*self.radius*self.height)
+  
+  def surface_area_top(self):
+    return (math.pi*self.radius**2)
+  
+  #inner diameter of tank
+  def diameter_1(self):
+    return self.radius * 2
+  
+  #outer diameter of tank
+  def diameter_2(self):
+    return (self.radius + self.material.thickness) * 2
+  
+  #outer diameter of tank + insulation
+  def diameter_3(self):
+    return (self.radius + self.material.thickness + self.insulation.thickness) * 2
+  
+  # just tank walls
+  def overall_heat_transfer_coefficient(self, air: Fluid):
+
+    wall_fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
+    wall_material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
+    wall_insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
+    wall_air_term = 1/air.heat_transfer_coefficient
+
+    # top_fluid_term = 1/self.fluid.heat_transfer_coefficient
+    # top_material_term = self.material.thickness/self.material.thermal_conductivity
+    # top_insulation_term = self.insulation.thickness/self.insulation.thermal_conductivity
+    # top_air_term = 1/air.heat_transfer_coefficient
+
+    side_h = 1/(wall_fluid_term + wall_material_term + wall_insulation_term + wall_air_term)
+    #top_h = 1/(top_fluid_term + top_material_term + top_insulation_term + top_air_term)
+
+    overall_heat_transfer_coefficient = side_h #+ top_h
+
+    return overall_heat_transfer_coefficient
     
-# ------------------------------- Pipe -------------------------------   
+# ------------------------------- Pipe --------------------------------------   
 class Pipe(Container):
-  def __init__(self, fluid, material, radius, length):
-    super().__init__(fluid, material)
+  def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid, radius, length, insulation: Material):
+    super().__init__(fluid, material, surroundings)
     self.radius = radius
     self.length = length
+    self.insulation = insulation
 
   def volume(self):
     return math.pi*self.length*self.radius**2
   
   def surface_area(self):
-    return (2*math.pi*self.radius*self.length)
+    return (math.pi*self.diameter_3()*self.length) # outer surface area
+  
+  #inner diameter of pipe
+  def diameter_1(self):
+    return self.radius * 2
+  
+  #outer diameter of pipe
+  def diameter_2(self):
+    return (self.radius + self.material.thickness) * 2
+  
+  #outer diameter of pipe + insulation
+  def diameter_3(self):
+    return (self.radius + self.material.thickness + self.insulation.thickness) * 2
 
 
+  def overall_heat_transfer_coefficient(self, air: Fluid):
+    # diameter ratios are necessary to correctly account for the cylindrical geometry and the logarithmic nature of radial heat conduction
+    fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
+    material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
+    insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
+    air_term = 1/air.heat_transfer_coefficient
+
+    overall_heat_transfer_coefficient = 1/(fluid_term + material_term + insulation_term + air_term)
+
+    return overall_heat_transfer_coefficient
+   

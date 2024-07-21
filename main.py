@@ -22,12 +22,13 @@ def main():
     DEV = True # True for development, False for production (saves outputs)
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
-    flow_rate = 0.0063 # [m^3/s] ~100gpm
+    flow_rate = 0.00063 # [m^3/s] ~50gpm
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
     air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
     air_heat_transfer_coeff = 10 # heat transfer coefficient of air [W/m^2*K]
+    water_in_pipe_heat_transfer_coeff =  1000 # heat transfer coefficient of water in pipe [W/m^2*K]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
     panel_hieght = 0.1 # [m]
@@ -38,7 +39,8 @@ def main():
     sigma = 5.670367e-8 # Stefan-Boltzmann constant [W/m^2*K^4]
     k_stainless_steal = 17 # Thermal conductivity of stainless steel [W/m*K]
     k_glass = 1 # Thermal conductivity of glass [W/m*K]
-    k_copper = 4#01 # Thermal conductivity of copper [W/m*K]
+    k_copper = 401 # Thermal conductivity of copper [W/m*K]
+    k_fiberglass = 0.036 # Thermal conductivity of fiberglass [W/m*K]
 
     # Ambient air intial conditions
     oa_temp = 26.6667 # [°C] Outside ambient air temperature 80°F
@@ -48,20 +50,21 @@ def main():
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
     panel_glass = comps.Material(k_glass, oa_temp, 0.01)
     copper_pipe = comps.Material(k_copper, zone_temp, 0.005)
+    k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.01)
 
     sun = comps.Sun()
 
-    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp)
-    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp)
-    panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp)
-    supply_hw = comps.Fluid(water_density, water_specific_heat, zone_temp)
-    tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp) 
-    return_hw = comps.Fluid(water_density, water_specific_heat, zone_temp)
+    outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff)
+    zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff)
+    panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
+    supply_hw = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
+    tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
+    return_hw = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
 
-    panel = comps.SolarPanel(panel_water, panel_glass, panel_length, panel_width, panel_hieght)
-    supply_pipe = comps.Pipe(supply_hw, copper_pipe, pipe_radius, pipe_length)
-    tank = comps.Tank(tank_water, tank_stainless_steal, tank_radius, tank_height)
-    return_pipe = comps.Pipe(return_hw, copper_pipe, pipe_radius, pipe_length)
+    panel = comps.SolarPanel(panel_water, panel_glass, outside_air, panel_length, panel_width, panel_hieght)
+    supply_pipe = comps.Pipe(supply_hw, copper_pipe, zone_air, pipe_radius, pipe_length, k_fiberglass_insulation)
+    tank = comps.Tank(tank_water, tank_stainless_steal, zone_air, tank_radius, tank_height, k_fiberglass_insulation)
+    return_pipe = comps.Pipe(return_hw, copper_pipe, zone_air, pipe_radius, pipe_length, k_fiberglass_insulation)
 
     # Put Water in containers
     panel.fluid.add_container(panel)
@@ -87,7 +90,7 @@ def main():
     
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-01 23:55:00'
+    end = '2022-07-03 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -124,15 +127,17 @@ def main():
         outside_air.temperature = weather_df.iloc[i]['Temperature']
         #panel heat loss blows up simulation
         #panel.fluid.lose_energy(panel.conduction_loss(outside_air, sim_step_seconds))
-        supply_pipe_cond_loss = supply_pipe.conduction_loss(zone_air, sim_step_seconds)
-        tank_cond_loss = tank.conduction_loss(zone_air, sim_step_seconds)
-        return_pipe_cond_loss = return_pipe.conduction_loss(zone_air, sim_step_seconds)
-        supply_pipe.fluid.lose_energy(supply_pipe_cond_loss)
-        tank.fluid.lose_energy(tank_cond_loss)
-        return_pipe.fluid.lose_energy(return_pipe_cond_loss)
+        tank_heat_loss = (tank.heat_loss(tank.surface_area_walls(), sim_step_seconds))
 
-        heat_transferred_to_air = (supply_pipe_cond_loss + tank_cond_loss + return_pipe_cond_loss)
+        supply_pipe_heat_loss = supply_pipe.heat_loss(supply_pipe.surface_area(), sim_step_seconds)
+        return_pipe_heat_loss = return_pipe.heat_loss(return_pipe.surface_area(), sim_step_seconds)
 
+        supply_pipe.fluid.lose_energy(supply_pipe_heat_loss)
+        tank.fluid.lose_energy(tank_heat_loss)
+        return_pipe.fluid.lose_energy(return_pipe_heat_loss)
+
+        heat_transferred_to_air = (supply_pipe_heat_loss + tank_heat_loss + return_pipe_heat_loss)
+        print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
         
         print(f"Sim timestep: {sim_step_seconds} s")
         print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
@@ -167,26 +172,26 @@ def main():
     ax1.set_title("Solar Water Heating Simulation")
     ax1.set_ylabel("Temperature (°C)")
     ax1.tick_params(axis="y")
-    ax1.legend(loc="upper right")
+    ax1.legend(loc="upper left")
 
     # Irradiance plot (right y-axis for ax1)
     ax1_twin = ax1.twinx()
     ax1_twin.set_ylabel("Irradiance (W/m^2)", color=sun_color)
     ax1_twin.plot(x, solar_energy, label="Irradiance", color=sun_color)
     ax1_twin.tick_params(axis="y", labelcolor=sun_color)
-    ax1_twin.legend(loc="upper left")
+    ax1_twin.legend(loc="upper right")
 
     # Other plot
     ax2.plot(x, weather_df["Temperature"], label="Outside Air Temp", color=oat_color)
     ax2.plot(x, zone_air_temps, label="Zone Air Temp", color=panel_color)
     ax2.set_xlabel("Time")
     ax2.set_ylabel("Temperature (°C)")
-    ax2.legend(loc="upper right")
+    ax2.legend(loc="upper left")
     ax2_twin = ax2.twinx()
     ax2_twin.plot(x, heat_loss, label="Heat Lost", color=heat_color)
     ax2_twin.set_xlabel("Time")
     ax2_twin.set_ylabel("Energy (J)")
-    ax2_twin.legend(loc="upper left")
+    ax2_twin.legend(loc="upper right")
 
     plt.tight_layout()
     if DEV:
