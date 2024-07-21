@@ -50,7 +50,7 @@ def main():
     # Initialize Components
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
     panel_glass = comps.Material(k_glass, oa_temp, 0.01)
-    copper_pipe = comps.Material(k_copper, zone_temp, 0.005)
+    copper_pipe = comps.Material(k_copper, oa_temp, 0.005)
     k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.01)
 
     sun = comps.Sun()
@@ -58,14 +58,14 @@ def main():
     outside_air = comps.Fluid(air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff_outside)
     zone_air = comps.Fluid(air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff_inside)
     panel_water = comps.Fluid(water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
-    supply_hw = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
+    supply_hw = comps.Fluid(water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
     tank_water = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
-    return_hw = comps.Fluid(water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
+    return_hw = comps.Fluid(water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
 
     panel = comps.SolarPanel(panel_water, panel_glass, outside_air, panel_length, panel_width, panel_hieght)
-    supply_pipe = comps.Pipe(supply_hw, copper_pipe, zone_air, pipe_radius, pipe_length, k_fiberglass_insulation)
+    supply_pipe = comps.Pipe(supply_hw, copper_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
     tank = comps.Tank(tank_water, tank_stainless_steal, zone_air, tank_radius, tank_height, k_fiberglass_insulation)
-    return_pipe = comps.Pipe(return_hw, copper_pipe, zone_air, pipe_radius, pipe_length, k_fiberglass_insulation)
+    return_pipe = comps.Pipe(return_hw, copper_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
 
     # Put Water in containers
     panel.fluid.add_container(panel)
@@ -75,10 +75,15 @@ def main():
 
     # Lists to store simulation results
     panel_temperatures = []
+    supply_pipe_temperatures = []
     tank_temperatures = []
+    return_pipe_temperatures = []
     zone_air_temps = []
     solar_energy = []
-    heat_loss = []
+    panel_heat_losses = []
+    pipe_heat_losses = []
+    tank_heat_losses = []
+    total_heat_losses = []
 
     # Weather parameters
     year = '2022'
@@ -118,6 +123,10 @@ def main():
         energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
         panel.fluid.add_energy(energy_to_panel)
 
+        # Pump control
+        # if sun.irradiance <= 0:
+        #     flow_rate = 0
+
         # Move and mix the fluids - This updates all comp fluid temps
         supply_pipe.fluid.mix_with(panel.fluid, flow_rate, sim_step_seconds)
         tank.fluid.mix_with(supply_pipe.fluid, flow_rate, sim_step_seconds)
@@ -126,10 +135,9 @@ def main():
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
-        #panel heat loss blows up simulation
+
         panel_heat_loss = panel.heat_loss(sim_step_seconds)
         tank_heat_loss = (tank.heat_loss(sim_step_seconds))
-
         supply_pipe_heat_loss = supply_pipe.heat_loss(sim_step_seconds)
         return_pipe_heat_loss = return_pipe.heat_loss(sim_step_seconds)
 
@@ -151,9 +159,14 @@ def main():
         # store temperatures and energies
         solar_energy.append(sun.irradiance)
         panel_temperatures.append(panel.fluid.temperature)
+        supply_pipe_temperatures.append(supply_pipe.fluid.temperature)
         tank_temperatures.append(tank.fluid.temperature)
-        heat_loss.append(heat_transferred_to_air)
+        return_pipe_temperatures.append(return_pipe.fluid.temperature)
         zone_air_temps.append(zone_air.temperature)
+        panel_heat_losses.append(panel_heat_loss)
+        pipe_heat_losses.append(supply_pipe_heat_loss + return_pipe_heat_loss)
+        tank_heat_losses.append(tank_heat_loss)
+        total_heat_losses.append(heat_transferred_to_air)
         print("---------------------------------------")
         
         
@@ -161,39 +174,49 @@ def main():
 
     # ------------------------------------------------ Outputs --------------------------------------------------
     x = weather_df.index  # time
-    panel_color = "red"
-    tank_color = "blue"
-    sun_color = "orange"
+    panel_color = "blue"
+    supply_pipe_color = "orange"
+    tank_color = "red"
+    return_pipe_color = "yellow"
+    sun_color = "gold"
     oat_color = "green"
-    heat_color = "black"
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
+
+    plt.style.use("Solarize_Light2")
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+    # Weather plot 
+    ax1.set_title("Solar Water Heating Simulation")
+    ax1.plot(x, solar_energy, label="Irradiance", color=sun_color)
+    ax1_twin = ax1.twinx()
+    ax1_twin.plot(x, weather_df["Temperature"], label="Outside Air Temp", color=oat_color, linestyle="--")
+    ax1.set_ylabel("Irradiance (W/m^2)", color=sun_color, fontweight='bold')
+    ax1.tick_params(axis="y", labelcolor=sun_color)
+    ax1_twin.set_ylabel("Temperature (°C)", color=oat_color, fontweight='bold')
+    ax1_twin.tick_params(axis="y", labelcolor=oat_color)
+    lines_1, labels_1 = ax1.get_legend_handles_labels()
+    lines_2, labels_2 = ax1_twin.get_legend_handles_labels()
+    ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper right')
+    ax1.grid(True, linestyle='--', alpha=0.7)
+
+    ax1_twin.grid(True, linestyle=':', alpha=0.5)
 
     # Temperature plot
-    ax1.plot(x, panel_temperatures, label="Panel Fluid Temp", color=panel_color)
-    ax1.plot(x, tank_temperatures, label="Tank Fluid Temp", color=tank_color)
-    ax1.set_title("Solar Water Heating Simulation")
-    ax1.set_ylabel("Temperature (°C)")
-    ax1.tick_params(axis="y")
-    ax1.legend(loc="upper left")
+    ax2.plot(x, panel_temperatures, label="Panel Fluid Temp", color=panel_color)
+    ax2.plot(x, supply_pipe_temperatures, label="Supply Pipe Fluid Temp", color=supply_pipe_color, linestyle=":")
+    ax2.plot(x, tank_temperatures, label="Tank Fluid Temp", color=tank_color)
+    ax2.plot(x, return_pipe_temperatures, label="Return Pipe Fluid Temp", color=return_pipe_color, linestyle=":")
+    ax2.set_ylabel("Temperature (°C)", fontweight='bold')
+    ax2.tick_params(axis="y")
+    ax2.legend(loc="upper right")
+    ax2.grid(True, linestyle='--', alpha=0.7)
 
-    # Irradiance plot (right y-axis for ax1)
-    ax1_twin = ax1.twinx()
-    ax1_twin.set_ylabel("Irradiance (W/m^2)", color=sun_color)
-    ax1_twin.plot(x, solar_energy, label="Irradiance", color=sun_color)
-    ax1_twin.tick_params(axis="y", labelcolor=sun_color)
-    ax1_twin.legend(loc="upper right")
-
-    # Other plot
-    ax2.plot(x, weather_df["Temperature"], label="Outside Air Temp", color=oat_color)
-    ax2.plot(x, zone_air_temps, label="Zone Air Temp", color=panel_color)
-    ax2.set_xlabel("Time")
-    ax2.set_ylabel("Temperature (°C)")
-    ax2.legend(loc="upper left")
-    ax2_twin = ax2.twinx()
-    ax2_twin.plot(x, heat_loss, label="Heat Lost", color=heat_color)
-    ax2_twin.set_xlabel("Time")
-    ax2_twin.set_ylabel("Energy (J)")
-    ax2_twin.legend(loc="upper right")
+    # Heat Loss plot
+    ax3.plot(x, panel_heat_losses, label="Panel Heat Loss", color=panel_color)
+    ax3.plot(x, pipe_heat_losses, label="Pipe Heat Loss", color="purple")
+    ax3.plot(x, tank_heat_losses, label="Tank Heat Loss", color=tank_color)
+    ax3.set_ylabel("Heat Loss (J)", fontweight='bold')
+    ax3.tick_params(axis="y")
+    ax3.legend(loc="upper right")
+    ax3.grid(True, linestyle='--', alpha=0.7)
 
     plt.tight_layout()
     if DEV:
@@ -206,7 +229,7 @@ def main():
                         "Zone Air Temp": zone_air_temps,
                         "Panel Temp": panel_temperatures,
                         "Tank Temp": tank_temperatures,
-                        "Heat Loss": heat_loss})
+                        "Total Heat Loss": total_heat_losses})
         df.to_csv("thermal-simulation.csv", index=False)
 
 
