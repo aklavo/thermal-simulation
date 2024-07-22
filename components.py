@@ -225,12 +225,12 @@ class Pipe(Container):
 
   def overall_UA(self, air: Fluid) -> float:
     # diameter ratios are necessary to correctly account for the cylindrical geometry and the logarithmic nature of radial heat conduction
-    fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
-    material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
-    insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
-    air_term = 1/air.heat_transfer_coefficient
+    r_inside = 1/(self.surface_area(self.diameter_1())*self.fluid.heat_transfer_coefficient)
+    r_pipe = (math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity*2*math.pi*self.length) 
+    r_insulation = (math.log(self.diameter_3()/self.diameter_2()))/(self.insulation.thermal_conductivity*2*math.pi*self.length)
+    r_air = 1/(air.heat_transfer_coefficient*self.surface_area(self.diameter_3()))
 
-    overall_UA = (1/(fluid_term + material_term + insulation_term + air_term))
+    overall_UA = (1/(r_inside + r_pipe + r_insulation + r_air))
 
     return overall_UA
    
