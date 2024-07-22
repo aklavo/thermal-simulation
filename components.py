@@ -50,7 +50,7 @@ class Fluid:
     self.temperature += energy/(self.specific_heat*self.mass())
 
   def lose_energy(self, energy: float):
-    print(f"Temperaure Change: {energy/(self.specific_heat*self.mass()):.3f}")
+    print(f"{self.get_name()} ΔT: {energy/(self.specific_heat*self.mass()):.2f}°C")
     self.temperature -= energy/(self.specific_heat*self.mass())
 
   # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
@@ -111,7 +111,7 @@ class Container(ABC):
     return heat_loss
   
   def radiation_loss(epsilon, sigma, A, T_surface, T_environment) -> float:
-      return epsilon * sigma * A * (T_surface**4 - T_environment**4)
+      return epsilon * sigma * A * (T_surface**4 - T_environment**4) #not currently in use
 
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Container):
