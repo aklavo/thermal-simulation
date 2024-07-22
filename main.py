@@ -219,8 +219,18 @@ def main():
     ax2.set_ylabel("Temperature (°C)", fontweight='bold')
     ax2.tick_params(axis="y")
     ax2.legend(loc='upper left', bbox_to_anchor=(1.05, 1.02))
+    ax2_twin = ax2.twinx()
+    ax2_twin.plot(x, flow_rates, label="Flow Rate", color='purple', alpha=0.5, zorder=0)
+    ax2_twin.set_ylabel("Flow Rate (m3/s)", color='purple', fontweight='bold')
+    ax2_twin.tick_params(axis="y", labelcolor='purple')
     ax2.grid(True, linestyle='--', alpha=0.7)
+    ax2_twin.grid(True, linestyle=':', alpha=0.5)
 
+    # Combine legends
+    lines_2, labels_2 = ax2.get_legend_handles_labels()
+    lines_2_twin, labels_2_twin = ax2_twin.get_legend_handles_labels()
+    ax2.legend(lines_2 + lines_2_twin, labels_2 + labels_2_twin, loc='upper left', bbox_to_anchor=(1.05, 1.02))
+    
     # Heat Loss plot
     ax3.plot(x, supply_pipe_heat_losses, label="Pipe Heat Loss", color=supply_pipe_color, linestyle=":")
     ax3.plot(x, tank_heat_losses, label="Tank Heat Loss", color=tank_color)
