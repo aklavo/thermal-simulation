@@ -221,7 +221,7 @@ def main():
     ax2.legend(loc='upper left', bbox_to_anchor=(1.05, 1.02))
     ax2_twin = ax2.twinx()
     ax2_twin.plot(x, flow_rates, label="Flow Rate", color='purple', alpha=0.5, zorder=0)
-    ax2_twin.set_ylabel("Flow Rate (m3/s)", color='purple', fontweight='bold')
+    ax2_twin.set_ylabel("Flow Rate (m^3/s)", color='purple', fontweight='bold')
     ax2_twin.tick_params(axis="y", labelcolor='purple')
     ax2.grid(True, linestyle='--', alpha=0.7)
     ax2_twin.grid(True, linestyle=':', alpha=0.5)
