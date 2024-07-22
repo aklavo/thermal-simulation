@@ -51,7 +51,7 @@ def main():
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
     panel_glass = comps.Material(k_glass, oa_temp, 0.01)
     copper_pipe = comps.Material(k_copper, oa_temp, 0.005)
-    k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.01)
+    k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.03)
 
     sun = comps.Sun()
 
