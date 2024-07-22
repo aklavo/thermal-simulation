@@ -40,7 +40,7 @@ def main():
     sigma = 5.670367e-8 # Stefan-Boltzmann constant [W/m^2*K^4]
     k_stainless_steal = 17 # Thermal conductivity of stainless steel [W/m*K]
     k_glass = 1 # Thermal conductivity of glass [W/m*K]
-    k_copper = 401 # Thermal conductivity of copper [W/m*K]
+    k_cast_iron = 80 # Thermal conductivity of cast iron [W/m*K]
     k_fiberglass = 0.036 # Thermal conductivity of fiberglass [W/m*K]
 
     # Ambient air intial conditions
@@ -50,7 +50,7 @@ def main():
     # Initialize Components
     tank_stainless_steal = comps.Material(k_stainless_steal, zone_temp, 0.03)
     panel_glass = comps.Material(k_glass, oa_temp, 0.01)
-    copper_pipe = comps.Material(k_copper, oa_temp, 0.005)
+    cast_iron_pipe = comps.Material(k_cast_iron, oa_temp, 0.005)
     k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.03)
 
     sun = comps.Sun()
@@ -63,9 +63,9 @@ def main():
     return_hw = comps.Fluid("HWR", water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
 
     panel = comps.SolarPanel(panel_water, panel_glass, outside_air, panel_length, panel_width, panel_hieght)
-    supply_pipe = comps.Pipe(supply_hw, copper_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
+    supply_pipe = comps.Pipe(supply_hw, cast_iron_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
     tank = comps.Tank(tank_water, tank_stainless_steal, zone_air, tank_radius, tank_height, k_fiberglass_insulation)
-    return_pipe = comps.Pipe(return_hw, copper_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
+    return_pipe = comps.Pipe(return_hw, cast_iron_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
 
     # Put Water in containers
     panel.fluid.add_container(panel)
