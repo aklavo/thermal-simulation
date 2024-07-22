@@ -232,5 +232,10 @@ class Pipe(Container):
 
     overall_UA = (1/(r_inside + r_pipe + r_insulation + r_air))
 
-    return overall_UA
+  
+  # ------------------------------- Pump --------------------------------------
+class Pump:
+  def __init__(self, flow_rate: float):
+    self.flow_rate = flow_rate
+   
    
