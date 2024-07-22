@@ -127,10 +127,10 @@ class SolarPanel(Container):
     return self.length * self.width * self.height
   
   def surface_area(self) -> float:
-    top_bottom = 2*(self.length * self.width)
+    top = (self.length * self.width) # assume bottom is lossless
     left_right = 2*(self.length * self.height)
     front_back = 2*(self.width * self.height)
-    return top_bottom + left_right + front_back
+    return top + left_right + front_back
   
   def solar_area(self) -> float:
     return self.length * self.width
