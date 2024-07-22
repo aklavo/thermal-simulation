@@ -136,11 +136,11 @@ class SolarPanel(Container):
     return self.length * self.width
   
   def overall_UA(self, air: Fluid) -> float:
-    fluid_term = 1/self.fluid.heat_transfer_coefficient
-    material_term = self.material.thickness/self.material.thermal_conductivity
-    air_term = 1/air.heat_transfer_coefficient
+    r_inside = 1/self.fluid.heat_transfer_coefficient
+    r_material = self.material.thickness/self.material.thermal_conductivity
+    r_air = 1/air.heat_transfer_coefficient
 
-    overall_UA = (fluid_term + material_term  + air_term) * self.surface_area()
+    overall_UA = (1/(r_inside + r_material  + r_air)) * self.surface_area()
 
     return overall_UA
     
