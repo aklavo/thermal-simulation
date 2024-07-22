@@ -94,7 +94,7 @@ def main():
     lon = '-105.0552'
     interval = '5'
     attributes = 'ghi,clearsky_ghi,air_temperature'
-    sim_step = '1min'
+    sim_step = '5min'
     weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
     
     # Simulation parameters
