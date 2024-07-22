@@ -19,16 +19,19 @@ from abc import ABC, abstractmethod
 # Radiation: Q = sig * A*  (T_hot - T_cold)^4
 #################################################
 
-
 # ------------------------------- Fluids -------------------------------
 class Fluid:
-  def __init__(self, density: float, specific_heat: float, temperature: float,
+  def __init__(self,name: str, density: float, specific_heat: float, temperature: float,
                 container=None, heat_transfer_coefficient=None):
+    self.name = name
     self.density = density
     self.specific_heat = specific_heat
     self.temperature = temperature # initial temperature of water 20°C
     self.container = container # container object if fluid is in a container
     self.heat_transfer_coefficient = heat_transfer_coefficient
+
+  def get_name(self) -> str:
+    return self.name
 
   def volume(self) -> float:
     return self.container.volume() if self.container else 0
