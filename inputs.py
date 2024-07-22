@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+"""
+File: inputs.py
+Author: Andrew Klavekoske
+Last Updated: 2024-07-22
+
+Description: An inputs file to store functions needed as 
+inputs to the main simulation file main.py. get_weather_data() fetches local weather
+data from the NREL NSRDB API.
+"""
 import requests
 import pandas as pd
 import urllib.parse
