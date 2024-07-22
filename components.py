@@ -48,10 +48,7 @@ class Fluid:
 
   def lose_energy(self, energy: float):
     print(f"Temperaure Change: {energy/(self.specific_heat*self.mass()):.3f}")
-    if energy > 0:
-      self.temperature -= energy/(self.specific_heat*self.mass())
-    else:
-      self.temperature += energy/(self.specific_heat*self.mass())
+    self.temperature -= energy/(self.specific_heat*self.mass())
 
   # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
   def mix_with(self, fluid, flow_rate: float, time: float):
@@ -205,33 +202,33 @@ class Pipe(Container):
     self.length = length
     self.insulation = insulation
 
-  def volume(self):
+  def volume(self) -> float:
     return math.pi*self.length*self.radius**2
   
-  def surface_area(self):
+  def surface_area(self) -> float:
     return (math.pi*self.diameter_3()*self.length) # outer surface area
   
   #inner diameter of pipe
-  def diameter_1(self):
+  def diameter_1(self) -> float:
     return self.radius * 2
   
   #outer diameter of pipe
-  def diameter_2(self):
+  def diameter_2(self) -> float:
     return (self.radius + self.material.thickness) * 2
   
   #outer diameter of pipe + insulation
-  def diameter_3(self):
+  def diameter_3(self) -> float:
     return (self.radius + self.material.thickness + self.insulation.thickness) * 2
 
 
-  def overall_UA(self, air: Fluid):
+  def overall_UA(self, air: Fluid) -> float:
     # diameter ratios are necessary to correctly account for the cylindrical geometry and the logarithmic nature of radial heat conduction
     fluid_term = (self.diameter_3())/(self.diameter_1()*self.fluid.heat_transfer_coefficient)
     material_term = (self.diameter_3()*math.log(self.diameter_2()/self.diameter_1()))/(self.material.thermal_conductivity) 
     insulation_term = (self.diameter_3()*math.log(self.diameter_3()/self.diameter_1()))/(self.insulation.thermal_conductivity)
     air_term = 1/air.heat_transfer_coefficient
 
-    overall_UA = (1/(fluid_term + material_term + insulation_term + air_term))*self.surface_area()
+    overall_UA = (1/(fluid_term + material_term + insulation_term + air_term))
 
     return overall_UA
    
