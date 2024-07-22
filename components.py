@@ -156,8 +156,8 @@ class Tank(Container):
   def volume(self) -> float:
     return math.pi*self.height*self.radius**2
   
-  def surface_area_walls(self) -> float:
-    return (2*math.pi*self.radius*self.height)
+  def surface_area_walls(self, diameter) -> float:
+    return (math.pi*diameter*self.height)
   
   def surface_area_top(self) -> float:
     return (math.pi*self.radius**2)
