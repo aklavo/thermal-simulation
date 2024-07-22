@@ -129,8 +129,8 @@ def main():
         panel.fluid.add_energy(energy_to_panel)
 
         # Pump control
-        if sun.irradiance <= 0:
-            flow_rate = 0.00063
+        if supply_pipe.fluid.temperature < tank.fluid.temperature:
+            flow_rate = 0#.00063
         else:
             flow_rate = 0.00063
 
