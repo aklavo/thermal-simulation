@@ -97,7 +97,7 @@ def main():
     
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-02 23:55:00'
+    end = '2022-07-05 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
@@ -107,12 +107,6 @@ def main():
     # Simulation loop in seconds
     print(f"Starting simulation at {sim_step} intervals...")
     for i in range(sim_length):
-        print(f"Time: {weather_df.index[i]}")
-        print(f"OAT: {weather_df.iloc[i]['Temperature']}")
-        print(f"Panel Fluid Temp before heat transfer: {panel.fluid.temperature:.3f}")
-        print(f"Supply Pipe Fluid Temp before heat transfer: {supply_pipe.fluid.temperature:.3f}")
-        print(f"Tank Fluid Temp before heat transfer: {tank.fluid.temperature:.3f}")
-        print(f"Return Pipe Fluid Temp before heat transfer: {return_pipe.fluid.temperature:.3f}")
         # Update sun energy
         if clouds == 1:
             sun.irradiance = weather_df.iloc[i]['GHI']
@@ -120,6 +114,15 @@ def main():
             sun.irradiance = weather_df.iloc[i]['Clearsky GHI']
         else:
             sun.irradiance = 0
+
+        print(f"Time: {weather_df.index[i]}")
+        print(f"Sim step: {sim_step_seconds} s")
+        print(f"OAT: {weather_df.iloc[i]['Temperature']:.2f}°C")
+        print(f"GHI: {sun.irradiance:.2f} W/m^2")
+        print(f"Panel Fluid Temp before heat transfer: {panel.fluid.temperature:.2f}°C")
+        print(f"Supply Pipe Fluid Temp before heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
+        print(f"Tank Fluid Temp before heat transfer: {tank.fluid.temperature:.2f}°C")
+        print(f"Return Pipe Fluid Temp before heat transfer: {return_pipe.fluid.temperature:.2f}°C")
 
         # Add solar energy into the panel
         energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
@@ -152,12 +155,11 @@ def main():
 
         heat_transferred_to_air = (panel_heat_loss + supply_pipe_heat_loss +
                                     tank_heat_loss + return_pipe_heat_loss)
-        print(f"Heat transferred to air: {heat_transferred_to_air:.3f}")
-        print(f"Sim timestep: {sim_step_seconds} s")
-        print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.3f}")
-        print(f"Supply Pipe Fluid Temp after heat transfer: {supply_pipe.fluid.temperature:.3f}")
-        print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.3f}")
-        print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.3f}")
+        print(f"Heat transferred to air: {heat_transferred_to_air:.2f} J")
+        print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.2f}°C")
+        print(f"Supply Pipe Fluid Temp after heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
+        print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.2f}°C")
+        print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.2f}°C")
         
         # store temperatures and energies
         solar_energy.append(sun.irradiance)
