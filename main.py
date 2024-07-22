@@ -187,9 +187,12 @@ def main():
     zone_air_color = "indigo"
 
     plt.style.use("Solarize_Light2")
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(18, 14), sharex=True)
+    plt.tight_layout()
+    fig.subplots_adjust(right=0.83, left= 0.05, top=0.97)
+
     # Weather plot 
-    ax1.set_title("Solar Water Heating Simulation")
+    ax1.set_title("Solar Water Heating Simulation", fontweight='bold')
     ax1.plot(x, solar_energy, label="Irradiance", color=sun_color)
     ax1_twin = ax1.twinx()
     ax1_twin.plot(x, weather_df["Temperature"], label="Outside Air Temp", color=oat_color, linestyle="--")
@@ -200,7 +203,7 @@ def main():
     ax1_twin.tick_params(axis="y", labelcolor=oat_color)
     lines_1, labels_1 = ax1.get_legend_handles_labels()
     lines_2, labels_2 = ax1_twin.get_legend_handles_labels()
-    ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper right')
+    ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left', bbox_to_anchor=(1.05, 1.02))
     ax1.grid(True, linestyle='--', alpha=0.7)
 
     ax1_twin.grid(True, linestyle=':', alpha=0.5)
@@ -212,20 +215,25 @@ def main():
     ax2.plot(x, return_pipe_temperatures, label="Return Pipe Fluid Temp", color=return_pipe_color, linestyle=":")
     ax2.set_ylabel("Temperature (°C)", fontweight='bold')
     ax2.tick_params(axis="y")
-    ax2.legend(loc="upper right")
+    ax2.legend(loc='upper left', bbox_to_anchor=(1.05, 1.02))
     ax2.grid(True, linestyle='--', alpha=0.7)
 
     # Heat Loss plot
-    ax3.plot(x, panel_heat_losses, label="Panel Heat Loss", color=panel_color)
     ax3.plot(x, supply_pipe_heat_losses, label="Pipe Heat Loss", color=supply_pipe_color, linestyle=":")
     ax3.plot(x, tank_heat_losses, label="Tank Heat Loss", color=tank_color)
     ax3.plot(x, return_pipe_heat_losses, label="Return Pipe Heat Loss", color=return_pipe_color, linestyle=":")
+    ax3_twin = ax3.twinx()
+    ax3_twin.set_ylabel("Panel Heat Loss (J)", color=panel_color, fontweight='bold')
+    ax3_twin.tick_params(axis="y", labelcolor=panel_color)
+    ax3_twin.plot(x, panel_heat_losses, label="Panel Heat Loss", color=panel_color)
     ax3.set_ylabel("Heat Loss (J)", fontweight='bold')
     ax3.tick_params(axis="y")
-    ax3.legend(loc="upper right")
+    lines_3, labels_3 = ax3.get_legend_handles_labels()
+    lines_4, labels_4 = ax3_twin.get_legend_handles_labels()
+    ax3.legend(lines_3 + lines_4, labels_3 + labels_4, loc='upper left', bbox_to_anchor=(1.05, 1.02))
     ax3.grid(True, linestyle='--', alpha=0.7)
+    ax3_twin.grid(True, linestyle=':', alpha=0.5)
 
-    plt.tight_layout()
     if DEV:
         plt.show()
     else:
