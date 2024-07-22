@@ -22,13 +22,13 @@ def main():
     DEV = True # True for development, False for production (saves outputs)
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
-    flow_rate = 0.00063 # [m^3/s] ~50gpm
+    flow_rate_intial = 0 # [m^3/s] 
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
     air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
     air_heat_transfer_coeff_inside = 10 # heat transfer coefficient of air [W/m^2*K]
-    air_heat_transfer_coeff_outside = 100 # heat transfer coefficient of air [W/m^2*K]
+    air_heat_transfer_coeff_outside = 50 # heat transfer coefficient of air [W/m^2*K]
     water_in_pipe_heat_transfer_coeff =  1000 # heat transfer coefficient of water in pipe [W/m^2*K]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
@@ -36,7 +36,7 @@ def main():
     tank_radius = 0.5 # [m]
     tank_height = 2 # [m]
     pipe_radius = 0.02 # [m]
-    pipe_length = 3 # [m]
+    pipe_length = 2 # [m]
     sigma = 5.670367e-8 # Stefan-Boltzmann constant [W/m^2*K^4]
     k_stainless_steal = 17 # Thermal conductivity of stainless steel [W/m*K]
     k_glass = 1 # Thermal conductivity of glass [W/m*K]
@@ -54,6 +54,7 @@ def main():
     k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.03)
 
     sun = comps.Sun()
+    pump = comps.Pump(flow_rate_intial)
 
     outside_air = comps.Fluid("OA", air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff_outside)
     zone_air = comps.Fluid("ZN", air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff_inside)
@@ -85,6 +86,7 @@ def main():
     tank_heat_losses = []
     return_pipe_heat_losses = []
     total_heat_losses = []
+    flow_rates = []
 
     # Weather parameters
     year = '2022'
@@ -130,15 +132,15 @@ def main():
 
         # Pump control
         if supply_pipe.fluid.temperature < tank.fluid.temperature:
-            flow_rate = 0#.00063
+            pump.flow_rate = 0
         else:
-            flow_rate = 0.00063
+            pump.flow_rate = 0.00063
 
         # Move and mix the fluids - This updates all comp fluid temps
-        panel.fluid.mix_with(return_pipe.fluid, flow_rate, sim_step_seconds)
-        supply_pipe.fluid.mix_with(panel.fluid, flow_rate, sim_step_seconds)
-        tank.fluid.mix_with(supply_pipe.fluid, flow_rate, sim_step_seconds)
-        return_pipe.fluid.mix_with(tank.fluid, flow_rate, sim_step_seconds)
+        panel.fluid.mix_with(return_pipe.fluid, pump.flow_rate, sim_step_seconds)
+        supply_pipe.fluid.mix_with(panel.fluid, pump.flow_rate, sim_step_seconds)
+        tank.fluid.mix_with(supply_pipe.fluid, pump.flow_rate, sim_step_seconds)
+        return_pipe.fluid.mix_with(tank.fluid, pump.flow_rate, sim_step_seconds)
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
@@ -161,7 +163,7 @@ def main():
         print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.2f}°C")
         print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.2f}°C")
         
-        # store temperatures and energies
+        # store temperatures and energies and flows
         solar_energy.append(sun.irradiance)
         panel_temperatures.append(panel.fluid.temperature)
         supply_pipe_temperatures.append(supply_pipe.fluid.temperature)
@@ -173,6 +175,7 @@ def main():
         tank_heat_losses.append(tank_heat_loss)
         return_pipe_heat_losses.append(return_pipe_heat_loss)
         total_heat_losses.append(heat_transferred_to_air)
+        flow_rates.append(pump.flow_rate)
         print("---------------------------------------")
     print("Simulation complete!")
 
