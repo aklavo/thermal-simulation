@@ -65,8 +65,8 @@ class Fluid:
 
     # update both fluid temperature to final temperatre
     if flow_rate > 0:
-      self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3)
-      fluid.temperature = self.temperature
+      self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3) #update only temp in direction of flow
+      #fluid.temperature = self.temperature
       return 
 
 # ------------------------------- Surfaces -------------------------------
