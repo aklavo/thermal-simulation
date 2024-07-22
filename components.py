@@ -207,8 +207,8 @@ class Pipe(Container):
   def volume(self) -> float:
     return math.pi*self.length*self.radius**2
   
-  def surface_area(self) -> float:
-    return (math.pi*self.diameter_3()*self.length) # outer surface area
+  def surface_area(self, diameter) -> float:
+    return (math.pi*diameter*self.length) # outer surface area
   
   #inner diameter of pipe
   def diameter_1(self) -> float:
