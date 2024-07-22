@@ -17,9 +17,9 @@ import components as comps
 import inputs
 import pandas as pd
 
-
 def main():
-    DEV = True # True for development, False for production (saves outputs)
+    # True for development, False for production (saves outputs)
+    DEV = input("Run in development mode? (True/False): ").lower() == 'true'
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
     flow_rate_intial = 0 # [m^3/s] 
@@ -94,7 +94,7 @@ def main():
     lon = '-105.0552'
     interval = '5'
     attributes = 'ghi,clearsky_ghi,air_temperature'
-    sim_step = '1min'
+    sim_step = '5min'
     weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
     
     # Simulation parameters
@@ -256,7 +256,14 @@ def main():
                         "Outside Air Temp": weather_df["Temperature"],
                         "Zone Air Temp": zone_air_temps,
                         "Panel Temp": panel_temperatures,
+                        "Supply Pipe Temp": supply_pipe_temperatures,
                         "Tank Temp": tank_temperatures,
+                        "Return Pipe Temp": return_pipe_temperatures,
+                        "Panel Heat Loss": panel_heat_losses,
+                        "Supply Pipe Heat Loss": supply_pipe_heat_losses,
+                        "Tank Heat Loss": tank_heat_losses,
+                        "Return Pipe Heat Loss": return_pipe_heat_losses,
+                        "Flow Rate": flow_rates,
                         "Total Heat Loss": total_heat_losses})
         df.to_csv("thermal-simulation.csv", index=False)
 
