@@ -121,7 +121,7 @@ class SolarPanel(Container):
     self.length = length
     self.width = width
     self.height = hieght
-    self.efficiency = 0.7 # % of sunlight coverted to heat <-- this is a heat transfer bandaid for now
+    self.efficiency = 0.8 # % of light energy coverted to heat energy in water <-- this is a heat transfer bandaid for now
 
   def volume(self) -> float:
     return self.length * self.width * self.height
