@@ -9,7 +9,6 @@ Description: Physics-based thermal simulation of a solar
 hot water panel and storage tank.
 """
 
-
 import matplotlib
 matplotlib.use("TkAgg") # To show plots in Ubuntu
 import matplotlib.pyplot as plt
@@ -19,7 +18,7 @@ import pandas as pd
 
 def main():
     # True for development, False for production (saves outputs)
-    DEV = input("Run in development mode? (True/False): ").lower() == 'true'
+    DEV = False#input("Run in development mode? (True/False): ").lower() == 'true'
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
     flow_rate_intial = 0 # [m^3/s] 
@@ -117,14 +116,14 @@ def main():
         else:
             sun.irradiance = 0
 
-        print(f"Time: {weather_df.index[i]}")
-        print(f"Sim step: {sim_step_seconds} s")
-        print(f"OAT: {weather_df.iloc[i]['Temperature']:.2f}°C")
-        print(f"GHI: {sun.irradiance:.2f} W/m^2")
-        print(f"Panel Fluid Temp before heat transfer: {panel.fluid.temperature:.2f}°C")
-        print(f"Supply Pipe Fluid Temp before heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
-        print(f"Tank Fluid Temp before heat transfer: {tank.fluid.temperature:.2f}°C")
-        print(f"Return Pipe Fluid Temp before heat transfer: {return_pipe.fluid.temperature:.2f}°C")
+        # print(f"Time: {weather_df.index[i]}")
+        # print(f"Sim step: {sim_step_seconds} s")
+        # print(f"OAT: {weather_df.iloc[i]['Temperature']:.2f}°C")
+        # print(f"GHI: {sun.irradiance:.2f} W/m^2")
+        # print(f"Panel Fluid Temp before heat transfer: {panel.fluid.temperature:.2f}°C")
+        # print(f"Supply Pipe Fluid Temp before heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
+        # print(f"Tank Fluid Temp before heat transfer: {tank.fluid.temperature:.2f}°C")
+        # print(f"Return Pipe Fluid Temp before heat transfer: {return_pipe.fluid.temperature:.2f}°C")
 
         # Add solar energy into the panel
         energy_to_panel = sun.energy(sim_step_seconds, panel.solar_area())*panel.efficiency
@@ -157,11 +156,11 @@ def main():
 
         heat_transferred_to_air = (panel_heat_loss + supply_pipe_heat_loss +
                                     tank_heat_loss + return_pipe_heat_loss)
-        print(f"Heat transferred to air: {heat_transferred_to_air:.2f} J")
-        print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.2f}°C")
-        print(f"Supply Pipe Fluid Temp after heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
-        print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.2f}°C")
-        print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.2f}°C")
+        # print(f"Heat transferred to air: {heat_transferred_to_air:.2f} J")
+        # print(f"Panel Fluid Temp after heat transfer: {panel.fluid.temperature:.2f}°C")
+        # print(f"Supply Pipe Fluid Temp after heat transfer: {supply_pipe.fluid.temperature:.2f}°C")
+        # print(f"Tank Fluid Temp after heat transfer: {tank.fluid.temperature:.2f}°C")
+        # print(f"Return Pipe Fluid Temp after heat transfer: {return_pipe.fluid.temperature:.2f}°C")
         
         # store temperatures and energies and flows
         solar_energy.append(sun.irradiance)
@@ -176,7 +175,7 @@ def main():
         return_pipe_heat_losses.append(return_pipe_heat_loss)
         total_heat_losses.append(heat_transferred_to_air)
         flow_rates.append(pump.flow_rate)
-        print("---------------------------------------")
+        #print("---------------------------------------")
     print("Simulation complete!")
 
     # ------------------------------------------------ Outputs --------------------------------------------------
