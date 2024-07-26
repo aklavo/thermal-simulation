@@ -99,7 +99,7 @@ def main():
     
     # Simulation parameters
     start = '2022-07-01 00:00:00'
-    end = '2022-07-05 23:55:00'
+    end = '2022-07-31 23:55:00'
     weather_df = weather_df.loc[start:end]
     sim_length = len(weather_df)
     sim_step_seconds = (weather_df.index[1]-weather_df.index[0]).total_seconds() # [s]
