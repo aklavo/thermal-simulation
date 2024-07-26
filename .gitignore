@@ -118,5 +118,5 @@ dmypy.json
 
 
 # helper files
-*.ipynb
+parse_weather_data.ipynb
 get_weather_csv.py
