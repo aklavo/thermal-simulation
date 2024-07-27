@@ -15,16 +15,17 @@ import time
 from io import StringIO
 from dotenv import load_dotenv
 import os
+import streamlit as st
 
 
 def get_weather_data(lat, lon, year, interval, attributes, resample="5min"):
     print(f"Getting weather data for {year} at {lat}, {lon}...")
     # ----------------------------- Request data from API --------------------------------------
     load_dotenv()
-    API_KEY = os.getenv("API_KEY")
+    API_KEY = st.secrets["API_KEY"] #os.getenv("API_KEY")
     BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-5min-download.csv"
-    FULL_NAME = os.getenv("FULL_NAME")
-    EMAIL = os.getenv("EMAIL")
+    FULL_NAME = st.secrets["FULL_NAME"]#os.getenv("FULL_NAME")
+    EMAIL = st.secrets["EMAIL"] #os.getenv("EMAIL")
     url = f"{BASE_URL}?api_key={API_KEY}"
     payload = {
         "names": year,
