@@ -234,7 +234,7 @@ def main():
     if DEV:
         plt.show()
     else:
-        plt.savefig("thermal-simulation.png")
+        plt.savefig("Outputs/thermal-simulation.png")
         df = pd.DataFrame({"Time": x,
                         "Irradiance": solar_energy,
                         "Outside Air Temp": weather_df["Temperature"],
@@ -249,7 +249,7 @@ def main():
                         "Return Pipe Heat Loss": return_pipe_heat_losses,
                         "Flow Rate": flow_rates,
                         "Total Heat Loss": total_heat_losses})
-        df.to_csv("thermal-simulation.csv", index=False)
+        df.to_csv("Outputs/thermal-simulation.csv", index=False)
 
 
 if __name__ == "__main__":

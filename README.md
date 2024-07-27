@@ -10,7 +10,7 @@ Minimum Requirements:
 
 
 ## System Diagram
-![system-diagram](system-diagram.jpg)
+![system-diagram](Images/system-diagram.jpg)
 
 ## Project Description
 This repository contains three python files, `main.py`, `input.py`, and `components.py`.

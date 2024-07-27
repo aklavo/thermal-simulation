@@ -8,7 +8,7 @@ st.header("Passive Logic's Prompt")
 '''
 Write a simple software simulation of the following system.  
 '''
-st.image("system-diagram.jpg")
+st.image("Images/system-diagram.jpg")
 '''
 Minimum Requirements:
 1. The system should simulate the heat transfer from a solar panel to a storage tank

@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
-st.logo("image_with_text.png")
+st.logo("Images/image_with_text.png")
 # Introduction Section
 motivation = st.Page("Introduction/1-Motivation.py", title="Motivation", icon=":material/target:")
 model_inputs = st.Page("Introduction/2-Model-Inputs.py", title="Model Inputs", icon=":material/input:")

@@ -93,6 +93,6 @@ st.subheader("Outputs")
 '''
 Running the simulation in production mode produces a png image and csv file of the relevant simulation parameters.
 '''
-st.image("thermal-simulation.png")
-sim_results = pd.read_csv("thermal-simulation.csv")
+st.image("Outputs/thermal-simulation.png")
+sim_results = pd.read_csv("Outputs/thermal-simulation.csv")
 st.dataframe(sim_results)
