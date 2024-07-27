@@ -4,7 +4,7 @@ st.set_page_config(
     page_icon="☀️" 
 )
 
-st.header("Passive Logic's Prompt")
+st.header("Prompt")
 '''
 Write a simple software simulation of the following system.  
 '''
