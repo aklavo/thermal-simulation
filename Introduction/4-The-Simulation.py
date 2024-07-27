@@ -11,13 +11,13 @@ st.subheader("Inputs")
 '''
 This simulation currently takes  in the following inputs:
 - Start/End Datetime (must be within the weather data range)
-- Timestep
+- Time-step
 - Clouds (1 = GHI, -1 = Clearsky GHI, 0 = no sun)
 
 '''
 st.subheader("Simulation")
 '''
-Other than storing the timeseries data, the simulation has four main sections.  
+Other than storing the time-series data, the simulation has four main sections.  
 1. Add solar energy into the panel
 2. Move/Mix the fluids of adjacent containers
 3. Loss energy to the surroundings

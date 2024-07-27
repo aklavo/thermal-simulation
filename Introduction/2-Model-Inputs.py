@@ -15,7 +15,7 @@ st.subheader("Weather")
 '''
 Weather data for this simulation was obtained from the NREL's 
 [National Solar Radiation Database](https://developer.nrel.gov/docs/solar/nsrdb/psm3-5min-download/).
-This simulation will take place in 2022, Westminster, CO. **Global horizontal irradenace (GHI), clear sky GHI, 
+This simulation will take place in 2022, Westminster, CO. **Global horizontal irradiance (GHI), clear sky GHI, 
 and outdoor dry-bulb temperature** will pulled at resolution of 5-min intervals. Indoor temperatures was assumed
 to be a constant 21.11°C (70°F) during the simulation.
 
@@ -72,7 +72,7 @@ The geometry of each component of the system is defined below.
 panel_geometry = '''
     panel_length = 2 # [m]
     panel_width = 1 # [m]
-    panel_hieght = 0.1 # [m]
+    panel_height = 0.1 # [m]
 '''
 st.code(panel_geometry, language='python')
 panel_length = 2  # [m]

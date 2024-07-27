@@ -12,21 +12,21 @@ f'''
 To model the different components of the system, classes were created that contain the necessary
 methods to calculate the heat transfer between the components. The classes are outlined below and 
 viewable in detail via the *Show Classes* toggle. All model components are initialized with the geometry and
-pysical properties mentioned in the [Model Inputs](Model-Inputs) section.
+physical properties mentioned in the [Model Inputs](Model-Inputs) section.
 #### Fluids
 The `Fluid` class is used to represent a fluid that can be stored within a container. Through 
 internal methods, fluids can `add_energy()` or `lose_energy()` via direct heat transfer or they can `mix_with()`
 another fluid.
 #### Containers
-The `Container` class is used to represent a volume that can contain a fluid. Three addtional
-classes inherit from the `Container` class to handle the specifc heat transfer associated with the geometry of
+The `Container` class is used to represent a volume that can contain a fluid. Three additional
+classes inherit from the `Container` class to handle the specific heat transfer associated with the geometry of
 that component:  
  - `Solar Panel`
  - `Tank`
  - `Pipe`  
 
 All contain `volume()` and `surface_area()` methods, which are used within the `overall_UA()` method
-that handles the convenction and conduction from the water, through the container, to the surroundings.
+that handles the convection and conduction from the water, through the container, to the surroundings.
 #### Materials
 The `Material` class is used to represent a material that can be used to build a container. Materials
 have a `thermal_conductivity`, `surface_temperature` and `thickness`.
@@ -75,7 +75,7 @@ if show_code:
     def lose_energy(self, energy: float):
       self.temperature -= energy/(self.specific_heat*self.mass())
 
-    # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
+    # heat lost by fluid_1 + Heat gained by fluid_2 = 0
     def mix_with(self, fluid, flow_rate: float, time: float):
       if flow_rate < 0:
           raise ValueError("Flow rate must be non-negative.")
@@ -85,7 +85,7 @@ if show_code:
       temp_1 = self.temperature
       temp_2 = fluid.temperature
 
-      # update both fluid temperature to final temperatre
+      # update both fluid temperature to final temperature
       if flow_rate > 0:
         self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3) #update only temp in direction of flow
         #fluid.temperature = self.temperature
@@ -101,7 +101,7 @@ if show_code:
   # ------------------------------- The Sun -------------------------------
   class Sun:
     def __init__(self):
-      self.irradiance = 0 # intal irradiance in W/m^2 or J/s*m^2
+      self.irradiance = 0 # initial irradiance in W/m^2 or J/s*m^2
 
     def energy(self, time: float, area: float) -> float:
       return self.irradiance*time*area
@@ -138,12 +138,12 @@ if show_code:
   # ------------------------------- Solar Panel -------------------------------
   class SolarPanel(Container):
     def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid,
-                  length: float, width: float, hieght: float):
+                  length: float, width: float, height: float):
       super().__init__(fluid, material, surroundings)
       self.length = length
       self.width = width
-      self.height = hieght
-      self.efficiency = 0.8 # % of light energy coverted to heat energy in water <-- this is a heat transfer bandaid for now
+      self.height = height
+      self.efficiency = 0.8 # % of light energy converted to heat energy in water <-- this is a heat transfer Band-Aid for now
 
     def volume(self) -> float:
       return self.length * self.width * self.height

@@ -10,7 +10,7 @@ hot water panel and storage tank.
 """
 
 import matplotlib
-matplotlib.use("TkAgg") # To show plots in Ubuntu
+#matplotlib.use("TkAgg") # To show plots in Ubuntu
 import matplotlib.pyplot as plt
 import components as comps
 import inputs
@@ -21,7 +21,7 @@ def main():
     DEV = False#input("Run in development mode? (True/False): ").lower() == 'true'
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
-    flow_rate_intial = 0 # [m^3/s] 
+    flow_rate_initial = 0 # [m^3/s] 
     water_density = 100 # density of water at 4°C [kg/m^3]
     water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
     air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
@@ -31,7 +31,7 @@ def main():
     water_in_pipe_heat_transfer_coeff =  1000 # heat transfer coefficient of water in pipe [W/m^2*K]
     panel_length = 2 # [m]
     panel_width = 1 # [m]
-    panel_hieght = 0.1 # [m]
+    panel_height = 0.1 # [m]
     tank_radius = 0.5 # [m]
     tank_height = 2 # [m]
     pipe_radius = 0.02 # [m]
@@ -42,7 +42,7 @@ def main():
     k_cast_iron = 80 # Thermal conductivity of cast iron [W/m*K]
     k_fiberglass = 0.036 # Thermal conductivity of fiberglass [W/m*K]
 
-    # Ambient air intial conditions
+    # Ambient air initial conditions
     oa_temp = 26.6667 # [°C] Outside ambient air temperature 80°F
     zone_temp = 21.111 # [°C] Inside ambient air temperature 70°F
 
@@ -53,7 +53,7 @@ def main():
     k_fiberglass_insulation = comps.Material(k_fiberglass, zone_temp, 0.03)
 
     sun = comps.Sun()
-    pump = comps.Pump(flow_rate_intial)
+    pump = comps.Pump(flow_rate_initial)
 
     outside_air = comps.Fluid("OA", air_density, air_specific_heat, oa_temp, heat_transfer_coefficient=air_heat_transfer_coeff_outside)
     zone_air = comps.Fluid("ZN", air_density, air_specific_heat, zone_temp, heat_transfer_coefficient=air_heat_transfer_coeff_inside)
@@ -62,7 +62,7 @@ def main():
     tank_water = comps.Fluid("Tank water", water_density, water_specific_heat, zone_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
     return_hw = comps.Fluid("HWR", water_density, water_specific_heat, oa_temp, heat_transfer_coefficient=water_in_pipe_heat_transfer_coeff)
 
-    panel = comps.SolarPanel(panel_water, panel_glass, outside_air, panel_length, panel_width, panel_hieght)
+    panel = comps.SolarPanel(panel_water, panel_glass, outside_air, panel_length, panel_width, panel_height)
     supply_pipe = comps.Pipe(supply_hw, cast_iron_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
     tank = comps.Tank(tank_water, tank_stainless_steal, zone_air, tank_radius, tank_height, k_fiberglass_insulation)
     return_pipe = comps.Pipe(return_hw, cast_iron_pipe, outside_air, pipe_radius, pipe_length, k_fiberglass_insulation)
