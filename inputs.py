@@ -23,8 +23,8 @@ def get_weather_data(lat, lon, year, interval, attributes, resample="5min"):
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     BASE_URL = "https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-5min-download.csv"
-    FULL_NAME = "AndrewKlavekoske"
-    EMAIL = "andrewklavo@gmail.com"
+    FULL_NAME = os.getenv("FULL_NAME")
+    EMAIL = os.getenv("EMAIL")
     url = f"{BASE_URL}?api_key={API_KEY}"
     payload = {
         "names": year,
