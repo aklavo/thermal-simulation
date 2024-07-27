@@ -50,7 +50,6 @@ class Fluid:
     self.temperature += energy/(self.specific_heat*self.mass())
 
   def lose_energy(self, energy: float):
-    # print(f"{self.get_name()} ΔT: {energy/(self.specific_heat*self.mass()):.2f}°C")
     self.temperature -= energy/(self.specific_heat*self.mass())
 
   # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
