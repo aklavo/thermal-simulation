@@ -126,7 +126,7 @@ def main():
         else:
             pump.flow_rate = 0.00063
 
-        # Move and mix the fluids - This updates all comp fluid temps
+        # Move and mix the fluids - This updates all fluid temps
         panel.fluid.mix_with(return_pipe.fluid, pump.flow_rate, sim_step_seconds)
         supply_pipe.fluid.mix_with(panel.fluid, pump.flow_rate, sim_step_seconds)
         tank.fluid.mix_with(supply_pipe.fluid, pump.flow_rate, sim_step_seconds)
@@ -145,10 +145,10 @@ def main():
         tank.fluid.lose_energy(tank_heat_loss)
         return_pipe.fluid.lose_energy(return_pipe_heat_loss)
 
-        heat_transferred_to_air = (panel_heat_loss + supply_pipe_heat_loss +
-                                    tank_heat_loss + return_pipe_heat_loss)
         
         # store temperatures and energies and flows
+        heat_transferred_to_air = (panel_heat_loss + supply_pipe_heat_loss +
+                                    tank_heat_loss + return_pipe_heat_loss)
         solar_energy.append(sun.irradiance)
         panel_temperatures.append(panel.fluid.temperature)
         supply_pipe_temperatures.append(supply_pipe.fluid.temperature)
