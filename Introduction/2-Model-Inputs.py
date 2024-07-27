@@ -267,3 +267,27 @@ pipe_fig.update_layout(
 )
 
 st.plotly_chart(pipe_fig, use_container_width=True)
+
+
+st.subheader("Physical Constants")
+'''
+The physical constant used in this simulation are defined below. In reality many of these values
+vary with the temperature and pressure of the system. Future work would more dynamic physical
+properties.
+'''
+
+constants = '''
+    water_density = 100 # density of water at 4°C [kg/m^3]
+    water_specific_heat = 4184 # specific heat of water at 20°C [J/kg°C]
+    air_density = 0.985 # density of air at 5000ft, 70°F, 29.7 inHg, 47% RH [kg/m^3]
+    air_specific_heat = 1.006 # specific heat of air at 20°C [J/kg°C]
+    air_heat_transfer_coeff_inside = 10 # heat transfer coefficient of air [W/m^2*K]
+    air_heat_transfer_coeff_outside = 50 # heat transfer coefficient of air [W/m^2*K]
+    water_in_pipe_heat_transfer_coeff =  1000 # heat transfer coefficient of water in pipe [W/m^2*K]
+    sigma = 5.670367e-8 # Stefan-Boltzmann constant [W/m^2*K^4]
+    k_stainless_steal = 17 # Thermal conductivity of stainless steel [W/m*K]
+    k_glass = 1 # Thermal conductivity of glass [W/m*K]
+    k_cast_iron = 80 # Thermal conductivity of cast iron [W/m*K]
+    k_fiberglass = 0.036 # Thermal conductivity of fiberglass [W/m*K]
+'''
+st.code(constants, language='python')
