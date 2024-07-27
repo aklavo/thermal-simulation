@@ -34,15 +34,25 @@ All physics based heat transfer equations are implemented in the classes.
 This file contains the main simulation loop. It is responsible for intialize model components, calling `get_weather_data()` based on disired inputs, running the simulation, and producing a simple plot and csv of simulation results.
 
 ## Installation
-After cloning the repo, install the necessary packages to you enviorment by running command below:  
+#### Manual Installation
+After cloning the repo, install the necessary packages to your enviorment by running command below:  
+
 `pip install -r requirements.txt`
 
-## Usage
 Execute the similation by running the command:  
+
 `python main.py`  
+
 Console output will prompt the user to execute the simulation in DEV mode or not(true/false). DEV mode will run `plt.show()` while `DEV == false` will save a png of the graph output and csv of simulation timeseries. Both modes print system variables each timestep to the terminal. 
 
 To kill the DEV process simply exit the graphical pop-up window.
+
+#### Docker Installation
+After cloning the repo, build the docker image by running the command:  
+
+`docker build -t solar-water-heater-simulation .`  
+
+`docker run -it solar-water-heater-simulation`
 
 ## Simulation Assumptions
 
