@@ -5,12 +5,6 @@ import plotly.graph_objects as go
 import pandas as pd
 from plotly.subplots import make_subplots
 
-
-st.set_page_config(
-    page_title="Thermal Simulation Report",
-    page_icon="☀️" 
-)
-
 st.header("Model Inputs")
 st.subheader("Weather")
 '''

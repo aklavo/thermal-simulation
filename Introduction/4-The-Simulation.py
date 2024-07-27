@@ -1,11 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(
-    page_title="Thermal Simulation Report",
-    page_icon="☀️" 
-)
-
 st.header("The Simulation")
 st.subheader("Inputs")
 '''

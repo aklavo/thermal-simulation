@@ -2,10 +2,6 @@ import streamlit as st
 import main
 import datetime
 
-st.set_page_config(
-    page_title="Thermal Simulation Report",
-    page_icon="☀️" 
-)
 col1, col2, col3 = st.columns(3)
 
 with col1:

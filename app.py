@@ -19,5 +19,8 @@ pg = st.navigation(
         "Simulation Results": [basic_results, regressions, sensitivity_analysis],
     }
 )
-
+st.set_page_config(
+    page_title="Thermal Simulation Report",
+    page_icon="☀️" 
+)
 pg.run()
