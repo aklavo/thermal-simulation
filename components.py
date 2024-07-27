@@ -50,10 +50,9 @@ class Fluid:
     self.temperature += energy/(self.specific_heat*self.mass())
 
   def lose_energy(self, energy: float):
-    print(f"{self.get_name()} ΔT: {energy/(self.specific_heat*self.mass()):.2f}°C")
     self.temperature -= energy/(self.specific_heat*self.mass())
 
-  # heat lossed by fluid_1 + Heat gained by fluid_2 = 0
+  # heat lost by fluid_1 + Heat gained by fluid_2 = 0
   def mix_with(self, fluid, flow_rate: float, time: float):
     if flow_rate < 0:
         raise ValueError("Flow rate must be non-negative.")
@@ -63,7 +62,7 @@ class Fluid:
     temp_1 = self.temperature
     temp_2 = fluid.temperature
 
-    # update both fluid temperature to final temperatre
+    # update both fluid temperature to final temperature
     if flow_rate > 0:
       self.temperature = ((mass_1*temp_1)+(mass_2*temp_2))/(mass_3) #update only temp in direction of flow
       #fluid.temperature = self.temperature
@@ -79,7 +78,7 @@ class Material:
 # ------------------------------- The Sun -------------------------------
 class Sun:
   def __init__(self):
-    self.irradiance = 0 # intal irradiance in W/m^2 or J/s*m^2
+    self.irradiance = 0 # initial irradiance in W/m^2 or J/s*m^2
 
   def energy(self, time: float, area: float) -> float:
     return self.irradiance*time*area
@@ -116,12 +115,12 @@ class Container(ABC):
 # ------------------------------- Solar Panel -------------------------------
 class SolarPanel(Container):
   def __init__(self, fluid: Fluid, material: Material, surroundings: Fluid,
-                length: float, width: float, hieght: float):
+                length: float, width: float, height: float):
     super().__init__(fluid, material, surroundings)
     self.length = length
     self.width = width
-    self.height = hieght
-    self.efficiency = 0.8 # % of light energy coverted to heat energy in water <-- this is a heat transfer bandaid for now
+    self.height = height
+    self.efficiency = 0.8 # % of light energy converted to heat energy in water <-- this is a heat transfer band-Aid for now
 
   def volume(self) -> float:
     return self.length * self.width * self.height
