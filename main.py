@@ -87,16 +87,11 @@ def main():
     total_heat_losses = []
     flow_rates = []
 
-    # Weather parameters
-    year = '2022'
-    lat = '39.8818'
-    lon = '-105.0552'
-    interval = '5'
-    attributes = 'ghi,clearsky_ghi,air_temperature'
-    sim_step = '5min'
-    weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
-    
+    #load weather_data
+    weather_df = pd.read_parquet('Outputs/weather_data.parquet')
+
     # Simulation parameters
+    sim_step = '5min'
     start = '2022-07-01 00:00:00'
     end = '2022-07-31 23:55:00'
     weather_df = weather_df.loc[start:end]

@@ -2,6 +2,7 @@ import streamlit as st
 import inputs
 import numpy as np
 import plotly.graph_objects as go
+import pandas as pd
 from plotly.subplots import make_subplots
 
 
@@ -32,8 +33,8 @@ if get_weather:
         interval = '5'
         attributes = 'ghi,clearsky_ghi,air_temperature'
         sim_step = '5min'
-        weather_df = inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
-
+        inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
+        weather_df = pd.read_parquet('Outputs/weather_data.parquet')
 if 'weather_df' in locals():
     with st.spinner("Plotting weather data..."):
  

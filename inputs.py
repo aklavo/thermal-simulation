@@ -76,4 +76,13 @@ def get_weather_data(lat, lon, year, interval, attributes, resample="5min"):
     # resample based on resample parameter
     df = df.resample(resample).interpolate()
     print(f"Done cleaning data. Weather is in {resample} intervals...")
-    return df
+    return df.to_parquet("Outputs/weather_data.parquet")
+    
+# Weather parameters
+# year = '2022'
+# lat = '39.8818'
+# lon = '-105.0552'
+# interval = '5'
+# attributes = 'ghi,clearsky_ghi,air_temperature'
+# 
+#inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
