@@ -1,11 +1,6 @@
-# thermal-simulation-PassiveLogic
+# Solar Water Heater Simulation
 
-
-## Name
-Solar Water Heater Simulation
-
-## Description
-PassiveLogical Prompt:
+## Passive Logic Prompt:
 
 Write a simple software simulation of the following system.
 Minimum Requirements:
@@ -14,23 +9,52 @@ Minimum Requirements:
 3. We will evaluate thermodynamic correctness, code approach, and results.
 
 
-## Visuals
-![system-diagram](system-diagram.jpg)
+## System Diagram
+![system-diagram](Images/system-diagram.jpg)
+
+## Project Description
+This repository contains three python files, `main.py`, `input.py`, and `components.py`.
+
+### input.py
+This file contains a single function called `get_weather_data()` which connects to the NREL's National Solar Radiation Database (NSRDB) API and pulls  weather data for the desired location and return a pandas dataframe.
+
+### components.py
+This file contains the model components of the system. All model components are defined as classes. The classes are:
+- `Fluid`
+- `Material`
+- `Sun`
+- `Container`
+    - `Tank`
+    - `SolarPanel`
+    - `Pipe`
+- `Pump`
+All physics based heat transfer equations are implemented in the classes.
+
+### main.py
+This file contains the main simulation loop. It is responsible for intialize model components, calling `get_weather_data()` based on disired inputs, running the simulation, and producing a simple plot and csv of simulation results.
 
 ## Installation
-The packages require to run this code can be installed with the following command:  
+#### Manual Installation
+After cloning the repo, install the necessary packages to your enviorment by running command below:  
+
 `pip install -r requirements.txt`
 
-## Usage
 Execute the similation by running the command:  
+
 `python main.py`  
-Console output will prompt the user to execute the simulation in DEV mode or not. DEV mode will run plt.show() while `DEV == false` will save a png of the graph output and csv of simulation timeseries. Both modes print system variables each timestep. 
+
+Console output will prompt the user to execute the simulation in DEV mode or not(true/false). DEV mode will run `plt.show()` while `DEV == false` will save a png of the graph output and csv of simulation timeseries. Both modes print system variables each timestep to the terminal. 
 
 To kill the DEV process simply exit the graphical pop-up window.
 
+#### Docker Installation
+After cloning the repo, build the docker image by running the command:  
 
+`docker build -t solar-water-heater-simulation .`  
 
-# Simulation Assumptions
+`docker run -it solar-water-heater-simulation`
+
+## Simulation Assumptions
 
 ### Basic Assumptions
 - The storage tank is a perfect cylinder.
