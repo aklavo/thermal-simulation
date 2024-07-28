@@ -81,6 +81,19 @@ if start <= end:
 else:
     st.error("Start date must be before or equal to end date.")
 
+# Simulation metrics
+start_tank_temp = results_df.iloc[0]["Tank Temperatures"]
+final_tank_temp = results_df.iloc[-1]["Tank Temperatures"]
+sim_step_seconds = (results_df['Time'].iloc[1]- results_df['Time'].iloc[0]).total_seconds()
+pump_time = (results_df["Flow Rates"] != 0).count()*sim_step_seconds
+
+with col1:
+    st.metric("Final Tank Temperature", f"{final_tank_temp:.2f}°C", delta=f"{final_tank_temp-start_tank_temp:.2f}°C")
+with col2:
+    st.metric("Pump Runtime", f"{pump_time/60/60} hrs ")
+
+
+
 st.subheader("Basic Simulation")
 '''
 The results discussed in this section are based on a start date of 2022-07-01 and an end date of 2022-07-03.
