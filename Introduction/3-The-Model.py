@@ -1,5 +1,4 @@
 import streamlit as st 
-import app
 
 st.header("The Model")
 st.subheader("Classes")

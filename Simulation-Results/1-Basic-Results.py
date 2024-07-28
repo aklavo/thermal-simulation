@@ -2,7 +2,6 @@ import streamlit as st
 import main
 import datetime
 import pandas as pd
-import app
 
 
 
@@ -64,7 +63,7 @@ if start <= end:
         )
 
     results_df = pd.read_parquet("Outputs/thermal-simulation.parquet")
-    fig = app.sim_output_plot(results_df)
+    fig = main.sim_output_plot(results_df)
     st.plotly_chart(fig, use_container_width=True)
 else:
     st.error("Start date must be before or equal to end date.")
