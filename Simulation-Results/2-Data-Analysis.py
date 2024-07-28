@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+from scipy import stats
 
 st.header("Data Analysis")
 '''
@@ -50,31 +51,35 @@ st.subheader("Tank Temperature Regression")
 
 regression_fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
+
 regression_fig.add_trace(
-                 go.Scatter(x=results_df["Outside Air Temperatures"], y=results_df["Tank Temperatures"], 
-                             mode='markers', name='Tank Temperature', marker=dict(color='orange')),
+
+                 go.Scatter(x=results_df["Tank Temperatures"], y=results_df["Tank Heat Losses"], 
+                             mode='markers', name='Tank Heat Losses'),
                  row=1, col=1
 )
 
 regression_fig.add_trace(
-                 go.Scatter(x=results_df["Outside Air Temperatures"], y=results_df["Tank Heat Losses"], 
-                             mode='markers', name='Tank Heat Losses'),
+
+                 go.Scatter(x=results_df["Tank Temperatures"], y=results_df["Supply Pipe Temperatures"], 
+                             mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
                  row=2, col=1
 )
 
 regression_fig.add_trace(
-                 go.Scatter(x=results_df["Outside Air Temperatures"], y=results_df["Supply Pipe Temperatures"], 
-                             mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
+                 go.Scatter(x=results_df["Tank Temperatures"], y=results_df["Outside Air Temperatures"], 
+                             mode='markers', name='Outside Air Temperature', marker=dict(color='orange')),
                  row=3, col=1
 )
 
-for i, y_col in enumerate(['Tank Temperatures', 'Tank Heat Losses', 'Supply Pipe Temperatures'], 1):
-           x = results_df["Outside Air Temperatures"]
+for i, y_col in enumerate(['Tank Heat Losses', 'Supply Pipe Temperatures', 'Outside Air Temperatures'], 1):
+           x = results_df["Tank Temperatures"]
            y = results_df[y_col]
-           slope, intercept = np.polyfit(x, y, 1)
+           slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
            line = slope * x + intercept
-           equation = f'y = {slope:.2f}x + {intercept:.2f}'
-    
+           r_squared = r_value**2
+           equation = f'y = {slope:.2f}x + {intercept:.2f}, R² = {r_squared:.2f}'
+
            regression_fig.add_trace(
                go.Scatter(x=x, y=line, mode='lines', 
                            name=f'OLS Trendline ({equation})', 
@@ -83,8 +88,8 @@ for i, y_col in enumerate(['Tank Temperatures', 'Tank Heat Losses', 'Supply Pipe
            )
 
 regression_fig.update_layout(height=900)
-regression_fig.update_xaxes(title_text="Outside Air Temperatures", row=3, col=1)
-regression_fig.update_yaxes(title_text="Tank Temperatures", row=1, col=1)
+regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
+regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=1, col=1)
 regression_fig.update_yaxes(title_text="Tank Heat Loss", row=2, col=1)
 regression_fig.update_yaxes(title_text="Supply Temperature", row=3, col=1)
 
