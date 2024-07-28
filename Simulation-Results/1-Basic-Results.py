@@ -67,3 +67,49 @@ if start <= end:
     st.plotly_chart(fig, use_container_width=True)
 else:
     st.error("Start date must be before or equal to end date.")
+
+st.subheader("Basic Simulation")
+'''
+The results discussed in this section are based on a start date of 2022-07-01 and an end date of 2022-07-03.
+'''
+'''
+When there is no sun, no heat loss, and no flow, all temperatures remains constant. The tank is modeled inside and thus remains at 21.11$^\circ$C
+and the panels and pipes are initialized at 26.66$^\circ$C. With no heat loss they remain at 26.66$^\circ$C. 
+
+If heat loss is enabled, the temperatures of the fluids in the panels and pipes will quickly track towards outdoor air temperatures. 
+'''
+
+st.subheader("Adding the Sun")
+'''
+The first step in modelling this system is to add an energy source to the system. This is done by adding actual solar energy (GHI) into the panel fluid.
+With no flow and no heat loss, the fluid in the panel will quickly rise while the sun is out and remain constant overnight. The panel temperature will follow
+this stair step rise indefinitely.
+
+When heat loss is enabled, again the fluids in pipes quickly track towards outdoor air temperatures. The panel temperature however is able to maintain 
+a higher than ambient temperature during the daytime (nonzero irradiance).
+'''
+
+st.subheader("Adding Flow")
+'''
+The next step is to add flow to the system. Under basic conditions (no sun, no heat loss) with a constant flow rate all fluids converge at final temperature
+of about 22.22$^\circ$C after about 30 minutes.
+
+When heat loss is enabled, all temperatures quickly track towards outdoor air temperatures, but because of the constant flow the pipe and tank temperatures
+(which are downstream of the panel) lag behind the panel temperature.
+
+When the sun is added back in this phase shift mentioned above isn't present and the tank temperature remains above the panel temperature in the second half
+of each day due to it's higher thermal resistance.
+'''
+
+st.subheader("Controlled Flow")
+'''
+Controlled flow in this cause refers to a static sequence of operation. The sequence is as follows:
+
+1. Compare the supply pipe temperature to the tank temperature. 
+    - If the supply pipe temperature is greater than the tank temperature, then the pump is turned on.
+    - If the supply pipe temperature is less than the tank temperature, then the pump is turned off.
+
+This sequence ensures that tank only every losses heat to its surroundings and not due to mixing with colder temperature fluids. Under this control
+the tank temperature can increase day over day despite its steady losses the the surrounding indoor air while the pump is off. 
+
+'''
