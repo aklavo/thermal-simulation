@@ -44,6 +44,18 @@ with col3:
         ],
     )
 
+    if pump_control in [1, 2]:
+        flow_rate_max = st.slider(
+            "Flow Rate [m³/s]",
+            min_value=0.0,
+            max_value=0.00063*3,
+            value=0.00063,
+            step=0.0001,
+            format="%.4f",
+        )  
+    else:
+        flow_rate_max = 0.0
+
 if start <= end:
     start_str = start.strftime("%Y-%m-%d 00:00:00")
     end_str = end.strftime("%Y-%m-%d 23:55:00")
@@ -59,6 +71,7 @@ if start <= end:
             clouds=clouds,
             heat_loss=heat_loss,
             pump_control=pump_control,
+            flow_rate_max=flow_rate_max,
             DEV=DEV,
         )
 
@@ -95,7 +108,8 @@ The next step is to add flow to the system. Under basic conditions (no sun, no h
 of about 22.22$^\circ$C after about 30 minutes.
 
 When heat loss is enabled, all temperatures quickly track towards outdoor air temperatures, but because of the constant flow the pipe and tank temperatures
-(which are downstream of the panel) lag behind the panel temperature.
+(which are downstream of the panel) lag behind the panel temperature. As flow increases the lag and amplitude approach the panel temperature. As the flow
+decreases the temporal lag increases and the temperature amplitude decreases.
 
 When the sun is added back in this phase shift mentioned above isn't present and the tank temperature remains above the panel temperature in the second half
 of each day due to it's higher thermal resistance.

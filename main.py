@@ -15,7 +15,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5min', clouds=1, heat_loss=True, pump_control=2, DEV=False):
+def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5min', clouds=1, heat_loss=True, pump_control=2, flow_rate_max=0.00063, DEV=False):
     # -------------------------------------------------- Inputs ------------------------------------------------
     # System constants
     flow_rate_initial = 0.00063 # [m^3/s] ~10gpm
@@ -115,12 +115,12 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
         if pump_control == 0:
             pump.flow_rate = 0
         elif pump_control == 1:
-            pump.flow_rate = flow_rate_initial
+            pump.flow_rate = flow_rate_max
         elif pump_control == 2:
             if supply_pipe.fluid.temperature < tank.fluid.temperature:
                 pump.flow_rate = 0
             else:
-                pump.flow_rate = 0.00063
+                pump.flow_rate = flow_rate_max
 
         # Move and mix the fluids - This updates all fluid temps
         panel.fluid.mix_with(return_pipe.fluid, pump.flow_rate, sim_step_seconds)
