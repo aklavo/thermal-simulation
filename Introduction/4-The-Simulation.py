@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import app
 
 st.header("The Simulation")
 st.subheader("Inputs")
@@ -98,8 +99,9 @@ if show_code:
 
 st.subheader("Outputs")
 '''
-Running the simulation in production mode produces a png image and csv file of the relevant simulation parameters.
+Running the simulation in production mode produces saves a png image and parquet file of the relevant simulation parameters to the Outputs folder.
 '''
-st.image("Outputs/thermal-simulation.png")
-sim_results = pd.read_csv("Outputs/thermal-simulation.csv")
-st.dataframe(sim_results)
+results_df = pd.read_parquet("Outputs/thermal-simulation.parquet")
+fig = app.sim_output_plot(results_df)
+st.plotly_chart(fig, use_container_width=True)
+st.dataframe(results_df)
