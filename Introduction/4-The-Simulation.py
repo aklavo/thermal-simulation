@@ -101,7 +101,7 @@ if show_code:
 st.subheader("Outputs")
 '''
 Running the simulation in production mode produces saves a png image and parquet file of the relevant simulation parameters to the Outputs folder.
-Below are interative plots and dataframes of the simulation results.
+Below are interactive plots and dataframes of the simulation results.
 '''
 with st.spinner("Running simulation..."):
     main.run_sim()

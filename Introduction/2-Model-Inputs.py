@@ -266,8 +266,8 @@ st.plotly_chart(pipe_fig, use_container_width=True)
 
 st.subheader("Physical Constants")
 '''
-The physical constant used in this simulation are defined below. In reality many of these values
-vary with the temperature and pressure of the system. Future work would more dynamic physical
+The physical constants used in this simulation are defined below. In reality many of these values
+vary with the temperature and pressure of the system. Future work would more incorporate more dynamic physical
 properties.
 '''
 
