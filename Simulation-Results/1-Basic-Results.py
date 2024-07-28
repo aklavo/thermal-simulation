@@ -6,6 +6,10 @@ import app
 
 
 
+st.header("Basic Results")
+'''
+Toggle between the most basic simulation **(no sun, no heat loss, no flow)** and the full simulation **(GHI, heat loss enabled, and controlled flow)**. 
+'''
 col1, col2, col3 = st.columns(3)
 
 with col1:
