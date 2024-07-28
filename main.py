@@ -69,20 +69,20 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
 
     # Lists to store simulation results
     sim_output_data = {
-        'time': [],
-        'panel_temperatures': [],
-        'supply_pipe_temperatures': [],
-        'tank_temperatures': [],
-        'return_pipe_temperatures': [],
-        'zone_air_temperatures': [],
-        'outside_air_temperatures': [],
-        'solar_energy': [],
-        'panel_heat_losses': [],
-        'supply_pipe_heat_losses': [],
-        'tank_heat_losses': [],
-        'return_pipe_heat_losses': [],
-        'total_heat_losses': [],
-        'flow_rates': []
+        'Time': [],
+        'Panel Temperatures': [],
+        'Supply Pipe Temperatures': [],
+        'Tank Temperatures': [],
+        'Return Pipe Temperatures': [],
+        'Zone Air Temperatures': [],
+        'Outside Air Temperatures': [],
+        'Solar Energy': [],
+        'Panel Heat Losses': [],
+        'Supply Pipe Heat Losses': [],
+        'Tank Heat Losses': [],
+        'Return Pipe Heat Losses': [],
+        'Total Heat Losses': [],
+        'Flow Rates': []
     }
     #load weather_data
     print("Loading weather data...")
@@ -147,20 +147,20 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
         # store temperatures and energies and flows
         heat_transferred_to_air = (panel_heat_loss + supply_pipe_heat_loss +
                                     tank_heat_loss + return_pipe_heat_loss)
-        sim_output_data['time'].append(weather_df.index[i])
-        sim_output_data['solar_energy'].append(sun.irradiance)
-        sim_output_data['panel_temperatures'].append(panel.fluid.temperature)
-        sim_output_data['supply_pipe_temperatures'].append(supply_pipe.fluid.temperature)
-        sim_output_data['tank_temperatures'].append(tank.fluid.temperature)
-        sim_output_data['return_pipe_temperatures'].append(return_pipe.fluid.temperature)
-        sim_output_data['zone_air_temperatures'].append(zone_air.temperature)
-        sim_output_data['outside_air_temperatures'].append(outside_air.temperature)
-        sim_output_data['panel_heat_losses'].append(panel_heat_loss)
-        sim_output_data['supply_pipe_heat_losses'].append(supply_pipe_heat_loss)
-        sim_output_data['tank_heat_losses'].append(tank_heat_loss)
-        sim_output_data['return_pipe_heat_losses'].append(return_pipe_heat_loss)
-        sim_output_data['total_heat_losses'].append(heat_transferred_to_air)
-        sim_output_data['flow_rates'].append(pump.flow_rate)
+        sim_output_data['Time'].append(weather_df.index[i])
+        sim_output_data['Solar Energy'].append(sun.irradiance)
+        sim_output_data['Panel Temperatures'].append(panel.fluid.temperature)
+        sim_output_data['Supply Pipe Temperatures'].append(supply_pipe.fluid.temperature)
+        sim_output_data['Tank Temperatures'].append(tank.fluid.temperature)
+        sim_output_data['Return Pipe Temperatures'].append(return_pipe.fluid.temperature)
+        sim_output_data['Zone Air Temperatures'].append(zone_air.temperature)
+        sim_output_data['Outside Air Temperatures'].append(outside_air.temperature)
+        sim_output_data['Panel Heat Losses'].append(panel_heat_loss)
+        sim_output_data['Supply Pipe Heat Losses'].append(supply_pipe_heat_loss)
+        sim_output_data['Tank Heat Losses'].append(tank_heat_loss)
+        sim_output_data['Return Pipe Heat Losses'].append(return_pipe_heat_loss)
+        sim_output_data['Total Heat Losses'].append(heat_transferred_to_air)
+        sim_output_data['Flow Rates'].append(pump.flow_rate)
     print("Simulation complete!")
 
     # ------------------------------------------------ Outputs --------------------------------------------------
@@ -181,10 +181,10 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
 
     # Weather plot 
     ax1.set_title("Solar Water Heating Simulation", fontweight='bold')
-    ax1.plot(x, sim_df["solar_energy"], label="Irradiance", color=sun_color)
+    ax1.plot(x, sim_df["Solar Energy"], label="Irradiance", color=sun_color)
     ax1_twin = ax1.twinx()
-    ax1_twin.plot(x, sim_df["outside_air_temperatures"], label="Outside Air Temp", color=oat_color, linestyle="--")
-    ax1_twin.plot(x, sim_df["zone_air_temperatures"], label="Zone Air Temp", color=zone_air_color, linestyle=":")
+    ax1_twin.plot(x, sim_df["Outside Air Temperatures"], label="Outside Air Temp", color=oat_color, linestyle="--")
+    ax1_twin.plot(x, sim_df["Zone Air Temperatures"], label="Zone Air Temp", color=zone_air_color, linestyle=":")
     ax1.set_ylabel("Irradiance (W/m^2)", color=sun_color, fontweight='bold')
     ax1.tick_params(axis="y", labelcolor=sun_color)
     ax1_twin.set_ylabel("Temperature (°C)", color=oat_color, fontweight='bold')
@@ -197,15 +197,15 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
     ax1_twin.grid(True, linestyle=':', alpha=0.5)
 
     # Temperature plot
-    ax2.plot(x, sim_df["panel_temperatures"], label="Panel Fluid Temp", color=panel_color)
-    ax2.plot(x, sim_df["supply_pipe_temperatures"], label="Supply Pipe Fluid Temp", color=supply_pipe_color, linestyle=":")
-    ax2.plot(x, sim_df["tank_temperatures"], label="Tank Fluid Temp", color=tank_color)
-    ax2.plot(x, sim_df["return_pipe_temperatures"], label="Return Pipe Fluid Temp", color=return_pipe_color, linestyle=":")
+    ax2.plot(x, sim_df["Panel Temperatures"], label="Panel Fluid Temp", color=panel_color)
+    ax2.plot(x, sim_df["Supply Pipe Temperatures"], label="Supply Pipe Fluid Temp", color=supply_pipe_color, linestyle=":")
+    ax2.plot(x, sim_df["Tank Temperatures"], label="Tank Fluid Temp", color=tank_color)
+    ax2.plot(x, sim_df["Return Pipe Temperatures"], label="Return Pipe Fluid Temp", color=return_pipe_color, linestyle=":")
     ax2.set_ylabel("Temperature (°C)", fontweight='bold')
     ax2.tick_params(axis="y")
     ax2.legend(loc='upper left', bbox_to_anchor=(1.05, 1.02))
     ax2_twin = ax2.twinx()
-    ax2_twin.plot(x, sim_df["flow_rates"], label="Flow Rate", color='purple', alpha=0.5, zorder=0)
+    ax2_twin.plot(x, sim_df["Flow Rates"], label="Flow Rate", color='purple', alpha=0.5, zorder=0)
     ax2_twin.set_ylabel("Flow Rate (m^3/s)", color='purple', fontweight='bold')
     ax2_twin.tick_params(axis="y", labelcolor='purple')
     ax2.grid(True, linestyle='--', alpha=0.7)
@@ -217,13 +217,13 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
     ax2.legend(lines_2 + lines_2_twin, labels_2 + labels_2_twin, loc='upper left', bbox_to_anchor=(1.05, 1.02))
     
     # Heat Loss plot
-    ax3.plot(x, sim_df["supply_pipe_heat_losses"], label="Pipe Heat Loss", color=supply_pipe_color, linestyle=":")
-    ax3.plot(x, sim_df["tank_heat_losses"], label="Tank Heat Loss", color=tank_color)
-    ax3.plot(x, sim_df["return_pipe_heat_losses"], label="Return Pipe Heat Loss", color=return_pipe_color, linestyle=":")
+    ax3.plot(x, sim_df["Supply Pipe Heat Losses"], label="Pipe Heat Loss", color=supply_pipe_color, linestyle=":")
+    ax3.plot(x, sim_df["Tank Heat Losses"], label="Tank Heat Loss", color=tank_color)
+    ax3.plot(x, sim_df["Return Pipe Heat Losses"], label="Return Pipe Heat Loss", color=return_pipe_color, linestyle=":")
     ax3_twin = ax3.twinx()
     ax3_twin.set_ylabel("Panel Heat Loss (J)", color=panel_color, fontweight='bold')
     ax3_twin.tick_params(axis="y", labelcolor=panel_color)
-    ax3_twin.plot(x, sim_df["panel_heat_losses"], label="Panel Heat Loss", color=panel_color)
+    ax3_twin.plot(x, sim_df["Panel Heat Losses"], label="Panel Heat Loss", color=panel_color)
     ax3.set_ylabel("Heat Loss (J)", fontweight='bold')
     ax3.tick_params(axis="y")
     lines_3, labels_3 = ax3.get_legend_handles_labels()
