@@ -11,6 +11,7 @@ hot water panel and storage tank.
 import matplotlib.pyplot as plt
 import components as comps
 import pandas as pd
+import random
 import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -130,6 +131,7 @@ def run_sim(start='2022-07-01 00:00:00', end='2022-07-03 23:55:00', sim_step='5m
       
         # Heat loss
         outside_air.temperature = weather_df.iloc[i]['Temperature']
+        zone_air.temperature = zone_temp + random.uniform(-0.5, 0.5)        
         if heat_loss:
             panel_heat_loss = panel.heat_loss(sim_step_seconds)
             supply_pipe_heat_loss = supply_pipe.heat_loss(sim_step_seconds)

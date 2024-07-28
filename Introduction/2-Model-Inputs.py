@@ -12,7 +12,8 @@ Weather data for this simulation was obtained from the NREL's
 [National Solar Radiation Database](https://developer.nrel.gov/docs/solar/nsrdb/psm3-5min-download/).
 This simulation will take place in 2022, Westminster, CO. **Global horizontal irradiance (GHI), clear sky GHI, 
 and outdoor dry-bulb temperature** will pulled at resolution of 5-min intervals. Indoor temperatures was assumed
-to be a constant 21.11°C (70°F) during the simulation.
+to be a roughly 21.11°C (70°F). A random deviation of ±0.5°C was added to the indoor temperature every time-step to simulate
+subtle changes in internal loads.
 
 Data is requested via an API call which returns a csv. This is then read into a pandas dataframe and visualized below.
 '''
