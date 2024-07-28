@@ -266,10 +266,10 @@ def sim_output_plot(df):
         fig.add_trace(go.Scatter(x=df['Time'], y=df['Panel Heat Losses'], name="Panel Heat Loss", line=dict(color="firebrick")), row=3, col=1, secondary_y=True)
         
         # Update y-axes labels
-        fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False, row=1, col=1, title_font=dict(color="goldenrod"), tickfont=dict(color="goldenrod"))
+        fig.update_yaxes(title_text="Irradiance (W/m²)", secondary_y=False, row=1, col=1, title_font=dict(color="goldenrod"), tickfont=dict(color="goldenrod"))
         fig.update_yaxes(title_text="Temperature (°C)", secondary_y=True, row=1, col=1)
         fig.update_yaxes(title_text="Temperature (°C)", secondary_y=False, row=2, col=1)
-        fig.update_yaxes(title_text="Flow Rate (m^3/s)", secondary_y=True, row=2, col=1, title_font=dict(color="purple"), tickfont=dict(color="purple"))
+        fig.update_yaxes(title_text="Flow Rate (m³/s)", secondary_y=True, row=2, col=1, title_font=dict(color="purple"), tickfont=dict(color="purple"))
         fig.update_yaxes(title_text="Heat Loss (J)", secondary_y=False, row=3, col=1)
         fig.update_yaxes(title_text="Panel Heat Loss (J)", secondary_y=True, row=3, col=1, title_font=dict(color="firebrick"), tickfont=dict(color="firebrick"))        
         
