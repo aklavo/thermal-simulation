@@ -10,7 +10,12 @@ physical properties mentioned in the [Model Inputs](Model-Inputs) section.
 #### Fluids
 The `Fluid` class is used to represent a fluid that can be stored within a container. Through 
 internal methods, fluids can `add_energy()` or `lose_energy()` via direct heat transfer or they can `mix_with()`
-another fluid.
+another fluid. `add_energy()` or `lose_energy()` use equation (1) and `mix_with()` uses equation (2) to calculate 
+the temperature change of the fluid.
+'''
+st.latex(r'q = mc(T_2 - T_1) \tag{1}')
+st.latex(r'T_f = \frac{m_1T_1 + m_2T_2}{m_1 + m_2} \tag{2}')
+'''
 #### Containers
 The `Container` class is used to represent a volume that can contain a fluid. Three additional
 classes inherit from the `Container` class to handle the specific heat transfer associated with the geometry of
@@ -21,6 +26,13 @@ that component:
 
 All contain `volume()` and `surface_area()` methods, which are used within the `overall_UA()` method
 that handles the convection and conduction from the water, through the container, to the surroundings.
+The general structure for heat lose across a flat wall (3) and cylinder (4) are outlined below:
+'''
+st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}}+\frac{t_{con}}{k_{con}}+\frac{t_{ins}}{k_{ins}}+\frac{1}{h_{air}}}*A \tag{3}')
+st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}A_1} + \frac{\ln(\frac{r_2}{r_1})}{2\pi k_{con}L} + \frac{\ln(\frac{r_3}{r_2})}{2\pi k_{ins}L} + \frac{1}{h_{air}A_3}} \tag{4}')
+st.latex(r'A_1 = 2\pi r_1 L ')
+st.latex(r'A_3 = 2\pi r_3 L ')
+'''
 #### Materials
 The `Material` class is used to represent a material that can be used to build a container. Materials
 have a `thermal_conductivity`, `surface_temperature` and `thickness`.
@@ -32,7 +44,7 @@ Future work would expand on this class to include more attributes such as: `powe
 '''
 
 
-show_code = st.toggle("Show Classes")
+show_code = st.toggle("Show Classes Code")
 
 if show_code:
     classes = '''
