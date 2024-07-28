@@ -4,10 +4,10 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# st.set_page_config(
-#     page_title="Thermal Simulation Report",
-#     page_icon="☀️" 
-# )
+st.set_page_config(
+    page_title="Thermal Simulation Report",
+    page_icon="☀️" 
+)
 #st.logo("Images/image_with_text.png")
 # Introduction Section
 motivation = st.Page("Introduction/1-Motivation.py", title="Motivation", icon=":material/target:")
