@@ -103,11 +103,12 @@ st.subheader("Outputs")
 Running the simulation in production mode produces saves a png image and parquet file of the relevant simulation parameters to the Outputs folder.
 Below are interactive plots and dataframes of the simulation results.
 '''
-with st.spinner("Running simulation..."):
-    main.run_sim()
-    results_df = pd.read_parquet("Outputs/thermal-simulation.parquet")
+with st.spinner("Getting Data..."):
+    results_df = pd.read_parquet("Outputs/thermal-simulation-full-year.parquet")
+    three_days_df = results_df.loc[(results_df['Time'] >= '2022-07-01 00:00:00') & (results_df['Time'] <= '2022-07-03 23:55:00')]
+  
 
 with st.spinner("Plotting simulation results..."):
-    fig = main.sim_output_plot(results_df)
+    fig = main.sim_output_plot(three_days_df)
     st.plotly_chart(fig, use_container_width=True)
-st.dataframe(results_df)
+st.dataframe(three_days_df)

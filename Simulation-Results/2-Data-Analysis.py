@@ -9,7 +9,7 @@ from scipy import stats
 
 st.header("Data Analysis")
 '''
-The follow analysis is performed on the full year of 2022, using the default simulation parameters. 
+The follow analysis is performed on the full year of 2022, using the default simulation parameters. Data is resampled to hourly, to speed up plotting. 
 - GHI
 - Heat Losses
 - Controlled Flow
@@ -18,15 +18,7 @@ The follow analysis is performed on the full year of 2022, using the default sim
 The purpose of this section is to analyze only the results and deduce insight on tank temperature.
 '''
 
-with st.spinner("Running simulation..."):
-    start = '2022-01-01 00:00:00'
-    end = '2022-12-31 23:55:00'
-    if not os.path.exists("Outputs/thermal-simulation.parquet") or \
-      pd.read_parquet("Outputs/thermal-simulation.parquet")["Time"].min().strftime("%Y-%m-%d %H:%M:%S") != start or \
-      pd.read_parquet("Outputs/thermal-simulation.parquet")["Time"].max().strftime("%Y-%m-%d %H:%M:%S") != end:
-       main.run_sim(start=start, end=end)
-
-results_df = pd.read_parquet("Outputs/thermal-simulation.parquet")
+results_df = pd.read_parquet("Outputs/thermal-simulation-full-year.parquet")
 # Convert to hourly to speed things up
 results_df['Time'] = pd.to_datetime(results_df['Time'])
 results_df.set_index('Time', inplace=True)
@@ -45,12 +37,14 @@ with st.container():
                 at {max_tank_start_temp:.2f}°C on {formatted_time}.''')
     col1, col2, col3 = st.columns([1,1,2])
     with col1:
-            st.dataframe(simple_stats["Tank Temperatures"])
+        st.dataframe(simple_stats["Tank Temperatures"])
     with col2:
+        with st.spinner("Plotting Data..."):
             box_plot_fig = px.box(results_df, y="Tank Temperatures")
 
             st.plotly_chart(box_plot_fig, use_container_width=True)
     with col3:
+        with st.spinner("Plotting Data..."):
             # Calculate mean and standard deviation
             mean_temp = results_df["Tank Temperatures"].mean()
             std_temp = results_df["Tank Temperatures"].std()
@@ -115,50 +109,47 @@ with st.container():
         This correlation is lost in winter, when the outside air temperatures are the lowest and heat loss dominates the system, leaving the tank temperature to 
         hover around the indoor zone temperature.
         '''
-    with st.spinner("Calculating Regression..."):
+with st.spinner("Calculating Regressions..."):
 
-        regression_fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05)
+    regression_fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
+    regression_fig.add_trace(
+                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Tank Heat Losses"], 
+                                mode='markers', name='Tank Heat Losses'),
+                    row=1, col=1
+    )
 
-        regression_fig.add_trace(
+    regression_fig.add_trace(
+                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Supply Pipe Temperatures"], 
+                                mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
+                    row=2, col=1
+    )
 
-                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Tank Heat Losses"], 
-                                    mode='markers', name='Tank Heat Losses'),
-                        row=1, col=1
-        )
+    regression_fig.add_trace(
+                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Outside Air Temperatures"], 
+                                mode='markers', name='Outside Air Temperature', marker=dict(color='orange')),
+                    row=3, col=1
+    )
 
-        regression_fig.add_trace(
+    for i, y_col in enumerate(['Tank Heat Losses', 'Supply Pipe Temperatures', 'Outside Air Temperatures'], 1):
+            x = reg_df["Tank Temperatures"]
+            y = reg_df[y_col]
+            slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+            line = slope * x + intercept
+            r_squared = r_value**2
+            equation = f'y = {slope:.2f}x + {intercept:.2f}, R² = {r_squared:.2f}'
 
-                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Supply Pipe Temperatures"], 
-                                    mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
-                        row=2, col=1
-        )
+            regression_fig.add_trace(
+                go.Scatter(x=x, y=line, mode='lines', 
+                            name=f'OLS Trendline ({equation})', 
+                            line=dict(color='red', dash='dash')),
+                row=i, col=1
+            )
 
-        regression_fig.add_trace(
-                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Outside Air Temperatures"], 
-                                    mode='markers', name='Outside Air Temperature', marker=dict(color='orange')),
-                        row=3, col=1
-        )
+    regression_fig.update_layout(height=900)
+    regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
+    regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=3, col=1)
+    regression_fig.update_yaxes(title_text="Tank Heat Loss", row=1, col=1)
+    regression_fig.update_yaxes(title_text="Supply Temperature", row=2, col=1)
 
-        for i, y_col in enumerate(['Tank Heat Losses', 'Supply Pipe Temperatures', 'Outside Air Temperatures'], 1):
-                x = reg_df["Tank Temperatures"]
-                y = reg_df[y_col]
-                slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-                line = slope * x + intercept
-                r_squared = r_value**2
-                equation = f'y = {slope:.2f}x + {intercept:.2f}, R² = {r_squared:.2f}'
-
-                regression_fig.add_trace(
-                    go.Scatter(x=x, y=line, mode='lines', 
-                                name=f'OLS Trendline ({equation})', 
-                                line=dict(color='red', dash='dash')),
-                    row=i, col=1
-                )
-
-        regression_fig.update_layout(height=900)
-        regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
-        regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=3, col=1)
-        regression_fig.update_yaxes(title_text="Tank Heat Loss", row=1, col=1)
-        regression_fig.update_yaxes(title_text="Supply Temperature", row=2, col=1)
-
-        st.plotly_chart(regression_fig, use_container_width=True)
+    st.plotly_chart(regression_fig, use_container_width=True)
