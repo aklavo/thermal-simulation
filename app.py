@@ -14,12 +14,12 @@ the_sim = st.Page("Introduction/4-The-Simulation.py", title="The Simulation",  i
 # Simulation Results Section
 basic_results = st.Page("Simulation-Results/1-Basic-Results.py", title="Basic Results", icon=":material/change_history:")
 data_analysis = st.Page("Simulation-Results/2-Data-Analysis.py", title="Data Analysis", icon=":material/square:")
-sensitivity_analysis = st.Page("Simulation-Results/3-Sensitivity-Analysis.py", title="Sensitivity Analysis", icon=":material/pentagon:")
+data_science = st.Page("Simulation-Results/3-Data-Science.py", title="Sensitivity Analysis", icon=":material/pentagon:")
 
 pg = st.navigation(
     {
         "Introduction": [motivation, model_inputs, the_model, the_sim],
-        "Simulation Results": [basic_results, data_analysis, sensitivity_analysis],
+        "Simulation Results": [basic_results, data_analysis, data_science],
     }
 )
 
