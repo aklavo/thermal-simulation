@@ -1,23 +1,11 @@
 import streamlit as st
 import pandas as pd
 import main
+import datetime
 
 st.header("The Simulation")
-st.subheader("Inputs")
 '''
-This simulation currently uses the following inputs:
-- Start/End Datetime (must be within the weather data range)
-- Time-step
-- Clouds (1 = GHI, -1 = Clearsky GHI, 0 = no sun)
-- heat_loss (True = heat loss, False = no heat loss)
-- pump_control (0 = no pump, 1 = constant pump, 2 = variable pump)
-- flow_rate_max (m^3/s)
-- DEV (True = just plt.show() output graph, False = save png and parquet to Outputs folder)
-
-'''
-st.subheader("Simulation")
-'''
-Other than storing the time-series data, the simulation has four main steps.  
+The simulation takes place within a single for loop. Other than storing the time-series data, the simulation has four main steps.  
 1. Add solar energy into the panel
 2. Move/Mix the fluids of adjacent containers
 3. Loss energy to the surroundings
@@ -101,19 +89,85 @@ if show_code:
     print("Simulation complete!")
         '''
     st.code(sim_code, language='python')
-
-st.subheader("Outputs")
+st.subheader("Inputs")
 '''
-Running the simulation in production mode (`DEV= False`) saves a png image and parquet file of the relevant simulation parameters to the **Outputs** folder.
-More information about DEV vs PROD mode can be found in the **README.md** file of the [repository](https://github.com/aklavo/thermal-simulation).
-Below is an interactive plot and a dataframe of the simulation results.
+This simulation currently uses the following inputs:
 '''
-with st.spinner("Getting Data..."):
-    results_df = pd.read_parquet("Outputs/thermal-simulation-full-year.parquet")
-    three_days_df = results_df.loc[(results_df['Time'] >= '2022-07-01 00:00:00') & (results_df['Time'] <= '2022-07-03 23:55:00')]
-  
+col1, col2, col3 = st.columns(3)
 
-with st.spinner("Plotting simulation results..."):
-    fig = main.sim_output_plot(three_days_df)
+with col1:
+    start = st.date_input(
+        "Start Date",
+        value=datetime.date(2022, 7, 1),
+        min_value=datetime.date(2022, 1, 1),
+        max_value=datetime.date(2022, 12, 31),
+    )
+    end = st.date_input(
+        "End Date",
+        value=datetime.date(2022, 7, 3),
+        min_value=datetime.date(2022, 1, 1),
+        max_value=datetime.date(2022, 12, 31),
+    )
+
+with col2:
+    clouds = st.radio(
+        "**Cloud Cover**",
+        [0, -1, 1],
+        format_func=lambda x: (
+            "No Sun" if x == 0 else "Clear Sky GHI" if x == -1 else "GHI"
+        ),
+    )
+    heat_loss = st.toggle("Enable Heat Loss", value=False)
+
+with col3:
+    pump_control = st.radio(
+        "**Pump Control**",
+        [0, 1, 2],
+        format_func=lambda x: {0: "No Flow", 1: "Constant Flow", 2: "Controlled Flow"}[
+            x
+        ],
+    )
+
+    if pump_control in [1, 2]:
+        flow_rate_max = st.slider(
+            "Max Flow Rate [m³/s]",
+            min_value=0.0,
+            max_value=0.00063*3,
+            value=0.00063,
+            step=0.0001,
+            format="%.4f",
+        )  
+    else:
+        flow_rate_max = 0.0
+
+if start <= end:
+    start_str = start.strftime("%Y-%m-%d 00:00:00")
+    end_str = end.strftime("%Y-%m-%d 23:55:00")
+
+    sim_step = "5min"
+    DEV = False
+
+    with st.spinner("Running simulation..."):
+        main.run_sim(
+            start=start_str,
+            end=end_str,
+            sim_step=sim_step,
+            clouds=clouds,
+            heat_loss=heat_loss,
+            pump_control=pump_control,
+            flow_rate_max=flow_rate_max,
+            DEV=DEV,
+        )
+
+    results_df = pd.read_parquet("Outputs/thermal-simulation.parquet")
+    fig = main.sim_output_plot(results_df)
+    st.subheader("Outputs")
+    '''
+    For more information about output specific simulation outputs and DEV mode refer to the [**README.md** ](https://github.com/aklavo/thermal-simulation).
+    '''
     st.plotly_chart(fig, use_container_width=True)
-st.dataframe(three_days_df, hide_index=True)
+else:
+    st.error("Start date must be before or equal to end date.")
+
+
+st.dataframe(results_df, hide_index=True)
