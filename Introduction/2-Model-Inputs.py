@@ -15,49 +15,37 @@ and outdoor dry-bulb temperature** will be pulled at a resolution of 5-min inter
 to be a roughly 21.11°C (70°F). A random deviation of ±0.5°C was added to the indoor temperature every time-step to simulate
 subtle changes in internal loads.
 
-Data is requested via an API call which returns a csv. This is then read into a pandas dataframe and visualized below.
+Data is requested via an API call returning a csv. This is then read into a pandas dataframe and visualized below.
 '''
 
-get_weather = st.button("Get Weather Data", type="primary")
-if get_weather:
-    with st.spinner("Fetching weather data..."):
-        # Weather parameters
-        year = '2022'
-        lat = '39.8818'
-        lon = '-105.0552'
-        interval = '5'
-        attributes = 'ghi,clearsky_ghi,air_temperature'
-        sim_step = '5min'
-        inputs.get_weather_data(lat, lon, year, interval, attributes,sim_step) # 5min data
-        weather_df = pd.read_parquet('Outputs/weather_data.parquet')
-if 'weather_df' in locals():
-    with st.spinner("Plotting weather data..."):
+with st.spinner("Plotting weather data..."):
+    weather_df = pd.read_parquet('Outputs/weather_data.parquet')
  
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-        fig.add_trace(
-            go.Scatter(x=weather_df.index, y=weather_df['GHI'], name="GHI"),
-            secondary_y=False,
-        )
+    fig.add_trace(
+        go.Scatter(x=weather_df.index, y=weather_df['GHI'], name="GHI"),
+        secondary_y=False,
+    )
 
-        fig.add_trace(
-            go.Scatter(x=weather_df.index, y=weather_df['Clearsky GHI'], name="Clearsky GHI"),
-            secondary_y=False,
-        )
+    fig.add_trace(
+        go.Scatter(x=weather_df.index, y=weather_df['Clearsky GHI'], name="Clearsky GHI"),
+        secondary_y=False,
+    )
 
-        fig.add_trace(
-            go.Scatter(x=weather_df.index, y=weather_df['Temperature'], name="Temperature"),
-            secondary_y=True,
-        )
+    fig.add_trace(
+        go.Scatter(x=weather_df.index, y=weather_df['Temperature'], name="Temperature"),
+        secondary_y=True,
+    )
 
-        fig.update_layout(
-            xaxis_title="Time",
-        )
-        
-        fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False)
-        fig.update_yaxes(title_text="Temperature (°C)", secondary_y=True)
+    fig.update_layout(
+        xaxis_title="Time",
+    )
+    
+    fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False)
+    fig.update_yaxes(title_text="Temperature (°C)", secondary_y=True)
 
-        st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("Geometry")
 '''
