@@ -45,6 +45,7 @@ with st.container():
     results_df.drop(columns=["Time"], inplace=True)
     st.dataframe(results_df, hide_index=True)
 with st.container():
+    @st.cache_data
     def display_model_results(predictions, y_test):
         with st.spinner("Displaying Results..."):
             results = st.container()

@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 import os
 import streamlit as st
 
-
+@st.cache_data
 def get_weather_data(lat, lon, year, interval, attributes, resample="5min"):
     print(f"Getting weather data for {year} at {lat}, {lon}...")
     # ----------------------------- Request data from API --------------------------------------

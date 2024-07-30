@@ -40,32 +40,40 @@ with st.container():
         st.dataframe(simple_stats["Tank Temperatures"])
     with col2:
         with st.spinner("Plotting Data..."):
-            box_plot_fig = px.box(results_df, y="Tank Temperatures")
-
-            st.plotly_chart(box_plot_fig, use_container_width=True)
+            @st.cache_data
+            def display_box_plot(results_df):
+                box_plot_fig = px.box(results_df, y="Tank Temperatures")
+                
+                return box_plot_fig
+            
+            st.plotly_chart(display_box_plot(results_df), use_container_width=True)
+            
     with col3:
         with st.spinner("Plotting Data..."):
             # Calculate mean and standard deviation
-            mean_temp = results_df["Tank Temperatures"].mean()
-            std_temp = results_df["Tank Temperatures"].std()
+            @st.cache_data
+            def plot_mean_std(results_df):
+      
+                mean_temp = results_df["Tank Temperatures"].mean()
+                std_temp = results_df["Tank Temperatures"].std()
 
-            # Create standard deviation plot
-            std_dev_fig = go.Figure()
-            std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=results_df["Tank Temperatures"],
-                                            mode='lines', name='Tank Temperature'))
-            std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp] * len(results_df),
-                                            mode='lines', name='Mean', line=dict(color='red', dash='dash')))
-            std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp + std_temp] * len(results_df),
-                                            mode='lines', name='+1 Std Dev', line=dict(color='green', dash='dot')))
-            std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp - std_temp] * len(results_df),
-                                            mode='lines', name='-1 Std Dev', line=dict(color='green', dash='dot')))
+                # Create standard deviation plot
+                std_dev_fig = go.Figure()
+                std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=results_df["Tank Temperatures"],
+                                                mode='lines', name='Tank Temperature'))
+                std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp] * len(results_df),
+                                                mode='lines', name='Mean', line=dict(color='red', dash='dash')))
+                std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp + std_temp] * len(results_df),
+                                                mode='lines', name='+1 Std Dev', line=dict(color='green', dash='dot')))
+                std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp - std_temp] * len(results_df),
+                                                mode='lines', name='-1 Std Dev', line=dict(color='green', dash='dot')))
 
-            std_dev_fig.update_layout(xaxis_title='Time', yaxis_title='Temperature (°C)', hovermode="x unified")
+                std_dev_fig.update_layout(xaxis_title='Time', yaxis_title='Temperature (°C)', hovermode="x unified")
 
-            st.plotly_chart(std_dev_fig, use_container_width=True)
-        
-
-
+                return std_dev_fig 
+            
+            st.plotly_chart(plot_mean_std(results_df), use_container_width=True)
+            
 
     st.subheader("Parameter Correlation")
     '''
@@ -92,13 +100,14 @@ with st.container():
 with st.container():
 
     st.subheader("Tank Temperature Regression")
-    summer = results_df.loc[results_df["Time"].dt.month.isin([6,7,8])]
-    winter = results_df.loc[results_df["Time"].dt.month.isin([12,1,2])]
-    fall = results_df.loc[results_df["Time"].dt.month.isin([9,10,11])]
-    spring = results_df.loc[results_df["Time"].dt.month.isin([3,4,5])]
-
-    seasons = {"Summer": summer, "Fall": fall, "Winter": winter, "Spring": spring}
-   
+    @st.cache_data
+    def get_seasons(results_df):
+        summer = results_df.loc[results_df["Time"].dt.month.isin([6,7,8])]
+        winter = results_df.loc[results_df["Time"].dt.month.isin([12,1,2])]
+        fall = results_df.loc[results_df["Time"].dt.month.isin([9,10,11])]
+        spring = results_df.loc[results_df["Time"].dt.month.isin([3,4,5])]
+        return {"Summer": summer, "Fall": fall, "Winter": winter, "Spring": spring}
+    seasons = get_seasons(results_df)
     col1, col2 = st.columns([1,2])
     with col1:
         selected_season = st.select_slider("Select Season", options=list(seasons.keys()))
@@ -110,46 +119,49 @@ with st.container():
         hover around the indoor zone temperature.
         '''
 with st.spinner("Calculating Regressions..."):
+    @st.cache_data
+    def regression_plots(reg_df):
+        regression_fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
-    regression_fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05)
+        regression_fig.add_trace(
+                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Tank Heat Losses"], 
+                                    mode='markers', name='Tank Heat Losses'),
+                        row=1, col=1
+        )
 
-    regression_fig.add_trace(
-                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Tank Heat Losses"], 
-                                mode='markers', name='Tank Heat Losses'),
-                    row=1, col=1
-    )
+        regression_fig.add_trace(
+                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Supply Pipe Temperatures"], 
+                                    mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
+                        row=2, col=1
+        )
 
-    regression_fig.add_trace(
-                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Supply Pipe Temperatures"], 
-                                mode='markers', name='Supply Pipe Temperatures', marker=dict(color='green')),
-                    row=2, col=1
-    )
+        regression_fig.add_trace(
+                        go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Outside Air Temperatures"], 
+                                    mode='markers', name='Outside Air Temperature', marker=dict(color='orange')),
+                        row=3, col=1
+        )
 
-    regression_fig.add_trace(
-                    go.Scatter(x=reg_df["Tank Temperatures"], y=reg_df["Outside Air Temperatures"], 
-                                mode='markers', name='Outside Air Temperature', marker=dict(color='orange')),
-                    row=3, col=1
-    )
+        for i, y_col in enumerate(['Tank Heat Losses', 'Supply Pipe Temperatures', 'Outside Air Temperatures'], 1):
+                x = reg_df["Tank Temperatures"]
+                y = reg_df[y_col]
+                slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+                line = slope * x + intercept
+                r_squared = r_value**2
+                equation = f'y = {slope:.2f}x + {intercept:.2f}, R² = {r_squared:.2f}'
 
-    for i, y_col in enumerate(['Tank Heat Losses', 'Supply Pipe Temperatures', 'Outside Air Temperatures'], 1):
-            x = reg_df["Tank Temperatures"]
-            y = reg_df[y_col]
-            slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-            line = slope * x + intercept
-            r_squared = r_value**2
-            equation = f'y = {slope:.2f}x + {intercept:.2f}, R² = {r_squared:.2f}'
+                regression_fig.add_trace(
+                    go.Scatter(x=x, y=line, mode='lines', 
+                                name=f'OLS Trendline ({equation})', 
+                                line=dict(color='red', dash='dash')),
+                    row=i, col=1
+                )
 
-            regression_fig.add_trace(
-                go.Scatter(x=x, y=line, mode='lines', 
-                            name=f'OLS Trendline ({equation})', 
-                            line=dict(color='red', dash='dash')),
-                row=i, col=1
-            )
+        regression_fig.update_layout(height=900, hovermode="x unified")
+        regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
+        regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=3, col=1)
+        regression_fig.update_yaxes(title_text="Tank Heat Loss", row=1, col=1)
+        regression_fig.update_yaxes(title_text="Supply Temperature", row=2, col=1)
+        
+        return regression_fig
 
-    regression_fig.update_layout(height=900, hovermode="x unified")
-    regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
-    regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=3, col=1)
-    regression_fig.update_yaxes(title_text="Tank Heat Loss", row=1, col=1)
-    regression_fig.update_yaxes(title_text="Supply Temperature", row=2, col=1)
-
-    st.plotly_chart(regression_fig, use_container_width=True)
+    st.plotly_chart(regression_plots(reg_df), use_container_width=True)
