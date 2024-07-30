@@ -15,11 +15,14 @@ the_sim = st.Page("Introduction/4-The-Simulation.py", title="The Simulation",  i
 basic_results = st.Page("Simulation-Results/1-Basic-Results.py", title="Basic Results", icon=":material/change_history:")
 data_analysis = st.Page("Simulation-Results/2-Data-Analysis.py", title="Data Analysis", icon=":material/square:")
 data_science = st.Page("Simulation-Results/3-Data-Science.py", title="Data Science", icon=":material/pentagon:")
+# Conclusion Section
+conclusion = st.Page("Conclusion/1-Conclusion.py", title="Conclusion", icon=":material/lightbulb:")
 
 pg = st.navigation(
     {
         "Introduction": [motivation, model_inputs, the_model, the_sim],
         "Simulation Results": [basic_results, data_analysis, data_science],
+        "Conclusion": [conclusion],
     }
 )
 
