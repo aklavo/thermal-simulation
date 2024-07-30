@@ -9,8 +9,8 @@ viewable in detail via the *Show Classes* toggle. All model components are initi
 physical properties mentioned in the [Model Inputs](Model-Inputs) section.
 #### Fluids
 The `Fluid` class is used to represent a fluid that can be stored within a container. Through 
-internal methods, fluids can `add_energy()` or `lose_energy()` via direct heat transfer or they can `mix_with()`
-another fluid. `add_energy()` or `lose_energy()` use equation (1) and `mix_with()` uses equation (2) to calculate 
+internal methods, fluids can `add_energy()`,  `lose_energy()`, or `mix_with()`
+another fluid to transfer heat. `add_energy()` or `lose_energy()` use equation (1) and `mix_with()` uses equation (2) to calculate 
 the temperature change of the fluid.
 '''
 st.latex(r'q = mc(T_2 - T_1) \tag{1}')
@@ -24,9 +24,9 @@ that component:
  - `Tank`
  - `Pipe`  
 
-Each sub-class contains `volume()` and `surface_area()` methods. These methods are used within the `overall_UA()` method
-that handles the convection/conduction losses between water and the container's surroundings.
-The general structure for heat loss across a flat wall (3) and cylinder (4) are outlined below:
+Each sub-class contains `volume()` and `surface_area()` methods. These functions are used within the `overall_UA()` method
+that handles the convection/conduction losses between fluids and the container's surroundings.
+The general structure for heat loss across a flat wall (3) and a cylinder (4) are outlined below:
 '''
 st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}}+\frac{t_{con}}{k_{con}}+\frac{t_{ins}}{k_{ins}}+\frac{1}{h_{air}}}*A \tag{3}')
 st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}A_1} + \frac{\ln(\frac{r_2}{r_1})}{2\pi k_{con}L} + \frac{\ln(\frac{r_3}{r_2})}{2\pi k_{ins}L} + \frac{1}{h_{air}A_3}} \tag{4}')
@@ -34,10 +34,12 @@ st.latex(r'A_1 = 2\pi r_1 L ')
 st.latex(r'A_3 = 2\pi r_3 L ')
 '''
 #### Materials
-The `Material` class is used to represent a material that can be used to build a container. Materials
-have a `thermal_conductivity`, `surface_temperature` and `thickness`.
+The `Material` class, you guessed it, is used to represent a material. Materials can be used to build a container (such as stainless steal) or surround a container
+(such as fiberglass insulation). Materials have a `thermal_conductivity`, `surface_temperature` and `thickness` attributes. All containers
+are initialized with a `Material` object, this allows for the calculation of the heat transfer between the container fluid and its surroundings.
 #### Sun
-The `Sun` class is used to represent the sun and its irradiance.
+The `Sun` class has a single attribute, irradiance, and a single method, `energy()`. The `energy()` method used a time and area parameter to calculate 
+the energy output of the sun.
 #### Pump
 The `Pump` class is used to represent a pump with a single attribute: `flow_rate`.
 Future work would expand on this class to include more attributes such as: `power`, `pressure`, etc.
