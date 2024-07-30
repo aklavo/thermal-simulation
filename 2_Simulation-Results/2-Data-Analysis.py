@@ -110,49 +110,54 @@ corr = results_df.corr()
 corr_plot = px.imshow(corr, labels={'color':'Correlation Coefficient'}, text_auto='.2f', aspect="auto")
 st.plotly_chart(corr_plot, use_container_width=True)
 '''
-Tank temperature is perfectly positively correlated with itself and tank heat losses. This is because tank heat losses are directly
-proportional to the tank temperature. Specifically the temperature is scaled by the ratio energy lost to the fluid mass multiplied by the fluid specific heat capacity.
+Tank temperature exhibits a perfect positive correlation with itself and tank heat losses. This correlation exists because tank heat losses are directly proportional to the tank temperature. The relationship can be expressed as:
+'''
+st.latex(r'T_2 = T_1 + \frac{Q}{c_p \cdot m}')
 
-The next highest correlation is with the supply and return pipe temperatures. This is because these are the two fluids mixing with the tank fluid.
+'''
+The next highest correlation is with the supply and return pipe temperatures, because the fluids mix with the tank fluid.
 
 Outside air is also positively correlated with tank temperature. This is because the outside air temperature is heavily correlated with the temperatures of the
-other three components (panels, supply and return pipes) and those temperatures lead into the tank temperature. The high correlation indicates that those components
+other three components (panels, supply and return pipes) and those components are attached to the tank. The high correlation indicates that those components
 lose heat to their surrounding easily.
 '''
 with st.container():
     st.subheader("Tank Temperature Regression")
+    '''
+    Throughout all seasons except winter, tank temperature is strongly correlated with tank heat losses, supply pipe temperatures, and outside air temperatures. 
+    This is because when outside air temperatures are the lowest, heat loss dominates the system. This leaves the tank temperature to hover around the indoor zone temperature.
+    Since the indoor temperature randomly fluctuates, the tank temperature and tank heat fluctuate around 21.11 °C and 0.0 Joules.
+    '''
     @st.cache_data
     def get_seasons(results_df):
         summer = results_df.loc[results_df["Time"].dt.month.isin([6,7,8])]
         winter = results_df.loc[results_df["Time"].dt.month.isin([12,1,2])]
         fall = results_df.loc[results_df["Time"].dt.month.isin([9,10,11])]
         spring = results_df.loc[results_df["Time"].dt.month.isin([3,4,5])]
-        return {"Summer": summer, "Fall": fall, "Winter": winter, "Spring": spring}
+        return {"Winter": winter, "Spring": spring, "Summer": summer, "Fall": fall}
     seasons = get_seasons(results_df)
 
 
-    selected_y_axis = st.radio("Select Y-axis", options=["Tank Heat Losses", "Supply Pipe Temperatures", "Outside Air Temperatures"], horizontal=True)
+    selected_y_axis = st.radio("",options=["Tank Heat Losses", "Supply Pipe Temperatures", "Outside Air Temperatures"], horizontal=True)
  
-    selected_seasons = st.multiselect("Select Seasons", options=list(seasons.keys()), default=list(seasons.keys()))
-
 with st.spinner("Calculating Regressions..."):
     @st.cache_data
+    def regression_plots(seasons, selected_y_axis):
+        regression_fig = make_subplots(rows=2, cols=2, subplot_titles=list(seasons.keys()))
 
-    def regression_plots(seasons, selected_y_axis, selected_seasons):
-        regression_fig = go.Figure()
+        colors = {'Winter': 'blue', 'Spring': 'green', 'Summer': 'red', 'Fall': 'orange'}
 
-        colors = {'Summer': 'red', 'Fall': 'orange', 'Winter': 'blue', 'Spring': 'green'}
-
-        for season, df in seasons.items():
-            if season not in selected_seasons:
-                continue
+        for i, (season, df) in enumerate(seasons.items()):
+            row = i // 2 + 1
+            col = i % 2 + 1
             
             x = df["Tank Temperatures"]
             y = df[selected_y_axis]
             
             regression_fig.add_trace(
                 go.Scatter(x=x, y=y, mode='markers', name=season,
-                           marker=dict(color=colors[season]))
+                           marker=dict(color=colors[season])),
+                row=row, col=col
             )
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
@@ -162,20 +167,17 @@ with st.spinner("Calculating Regressions..."):
 
             regression_fig.add_trace(
                 go.Scatter(x=x, y=line, mode='lines', 
-                           name=f'{season} OLS Trendline ({equation})', 
-                           line=dict(color=colors[season], dash='dash'))
+                           name=f'{season} OLS Trendline', 
+                           line=dict(color=colors[season], dash='dash')),
+                row=row, col=col
             )
 
-        regression_fig.update_layout(height=600, hovermode="x unified")
-        regression_fig.update_xaxes(title_text="Tank Temperatures")
-        regression_fig.update_yaxes(title_text=selected_y_axis)
+            regression_fig.update_xaxes(title_text="Tank Temperatures", row=row, col=col)
+            regression_fig.update_yaxes(title_text=selected_y_axis, row=row, col=col)
+
+        regression_fig.update_layout(height=800, showlegend=False)
         
         return regression_fig
 
 
-    st.plotly_chart(regression_plots(seasons, selected_y_axis, selected_seasons), use_container_width=True)
-'''
-Throughout all seasons expect winter, tank temperature has a strong correlations with tank heat losses, supply pipe temperatures, and outside air temperatures. 
-This is because when outside air temperatures are the lowest heat loss dominates the system.This leaves the tank temperature to hover around the indoor zone temperature.
-Since the indoor temperature randomly fluctuates, the tank temperature and tank heat fluctuate about the point 21.11 °C and 0.0 Joules.
-'''
+    st.plotly_chart(regression_plots(seasons, selected_y_axis), use_container_width=True)
