@@ -112,17 +112,19 @@ with col1:
 with col2:
     clouds = st.radio(
         "**Cloud Cover**",
-        [0, -1, 1],
+        [1, -1, 0],
         format_func=lambda x: (
             "No Sun" if x == 0 else "Clear Sky GHI" if x == -1 else "GHI"
         ),
+        index=0
     )
-    heat_loss = st.toggle("Enable Heat Loss", value=False)
+    heat_loss = st.toggle("Enable Heat Loss", value=True)
 
 with col3:
     pump_control = st.radio(
         "**Pump Control**",
         [0, 1, 2],
+        index=2,
         format_func=lambda x: {0: "No Flow", 1: "Constant Flow", 2: "Controlled Flow"}[
             x
         ],
