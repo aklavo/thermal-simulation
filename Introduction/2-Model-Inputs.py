@@ -40,6 +40,7 @@ with st.spinner("Plotting weather data..."):
 
     fig.update_layout(
         xaxis_title="Time",
+        hovermode="x unified"
     )
     
     fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False)

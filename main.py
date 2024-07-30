@@ -292,7 +292,8 @@ def sim_output_plot(df):
                 x=1.01,
                 traceorder="grouped"
             ),
-            legend_tracegroupgap=200
+            legend_tracegroupgap=200,
+            hovermode="x unified"
         )
         return fig
 

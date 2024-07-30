@@ -60,7 +60,7 @@ with st.container():
             std_dev_fig.add_trace(go.Scatter(x=results_df["Time"], y=[mean_temp - std_temp] * len(results_df),
                                             mode='lines', name='-1 Std Dev', line=dict(color='green', dash='dot')))
 
-            std_dev_fig.update_layout(xaxis_title='Time', yaxis_title='Temperature (°C)')
+            std_dev_fig.update_layout(xaxis_title='Time', yaxis_title='Temperature (°C)', hovermode="x unified")
 
             st.plotly_chart(std_dev_fig, use_container_width=True)
         
@@ -146,7 +146,7 @@ with st.spinner("Calculating Regressions..."):
                 row=i, col=1
             )
 
-    regression_fig.update_layout(height=900)
+    regression_fig.update_layout(height=900, hovermode="x unified")
     regression_fig.update_xaxes(title_text="Tank Temperatures", row=3, col=1)
     regression_fig.update_yaxes(title_text="Outside Air Temperatures", row=3, col=1)
     regression_fig.update_yaxes(title_text="Tank Heat Loss", row=1, col=1)

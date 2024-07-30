@@ -79,6 +79,7 @@ with st.container():
             fig.update_xaxes(title_text="Theoretical Quantiles", row=1, col=2)
             fig.update_yaxes(title_text="Residuals", row=1, col=1)
             fig.update_yaxes(title_text="Sample Quantiles", row=1, col=2)
+            fig.update_layout(hovermode="x unified")
 
             col2.plotly_chart(fig, use_container_width=True)
 
@@ -87,6 +88,7 @@ with st.container():
             fig.add_trace(go.Scatter(x=y_test, y=predictions, mode='markers', name='Actual vs Predicted', marker=dict(color='purple')))  
             fig.update_xaxes(title_text="Actual Values")
             fig.update_yaxes(title_text="Predicted Values")
+            fig.update_layout(hovermode="x unified")
             results.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Linear Regression")
