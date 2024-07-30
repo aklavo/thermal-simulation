@@ -24,9 +24,9 @@ that component:
  - `Tank`
  - `Pipe`  
 
-All contain `volume()` and `surface_area()` methods, which are used within the `overall_UA()` method
-that handles the convection and conduction from the water, through the container, to the surroundings.
-The general structure for heat lose across a flat wall (3) and cylinder (4) are outlined below:
+Each sub-class contains `volume()` and `surface_area()` methods. These methods are used within the `overall_UA()` method
+that handles the convection/conduction losses between water and the container's surroundings.
+The general structure for heat loss across a flat wall (3) and cylinder (4) are outlined below:
 '''
 st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}}+\frac{t_{con}}{k_{con}}+\frac{t_{ins}}{k_{ins}}+\frac{1}{h_{air}}}*A \tag{3}')
 st.latex(r'UA = \frac{1}{\frac{1}{h_{H_2O}A_1} + \frac{\ln(\frac{r_2}{r_1})}{2\pi k_{con}L} + \frac{\ln(\frac{r_3}{r_2})}{2\pi k_{ins}L} + \frac{1}{h_{air}A_3}} \tag{4}')
@@ -39,7 +39,7 @@ have a `thermal_conductivity`, `surface_temperature` and `thickness`.
 #### Sun
 The `Sun` class is used to represent the sun and its irradiance.
 #### Pump
-The `Pump` class is used to represent a pump which only has single attributes: `flow_rate`.
+The `Pump` class is used to represent a pump with a single attribute: `flow_rate`.
 Future work would expand on this class to include more attributes such as: `power`, `pressure`, etc.
 '''
 

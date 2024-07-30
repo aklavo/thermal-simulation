@@ -5,7 +5,7 @@ import main
 st.header("The Simulation")
 st.subheader("Inputs")
 '''
-This simulation currently takes  in the following inputs:
+This simulation currently uses the following inputs:
 - Start/End Datetime (must be within the weather data range)
 - Time-step
 - Clouds (1 = GHI, -1 = Clearsky GHI, 0 = no sun)
@@ -13,7 +13,7 @@ This simulation currently takes  in the following inputs:
 '''
 st.subheader("Simulation")
 '''
-Other than storing the time-series data, the simulation has four main sections.  
+Other than storing the time-series data, the simulation has four main steps.  
 1. Add solar energy into the panel
 2. Move/Mix the fluids of adjacent containers
 3. Loss energy to the surroundings
@@ -100,8 +100,9 @@ if show_code:
 
 st.subheader("Outputs")
 '''
-Running the simulation in production mode produces saves a png image and parquet file of the relevant simulation parameters to the Outputs folder.
-Below are interactive plots and dataframes of the simulation results.
+Running the simulation in production mode (`DEV= False`) saves a png image and parquet file of the relevant simulation parameters to the **Outputs** folder.
+More information about DEV vs PROD mode can be found in the **README.md** file of the [repository](https://github.com/aklavo/thermal-simulation).
+Below is an interactive plot and a dataframe of the simulation results.
 '''
 with st.spinner("Getting Data..."):
     results_df = pd.read_parquet("Outputs/thermal-simulation-full-year.parquet")
