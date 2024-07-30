@@ -10,9 +10,11 @@ import statsmodels.api as sm
 from sklearn.ensemble import RandomForestRegressor
 
 with st.container():
-    st.header("Date Science")
-    
-    "Can we predict the temperature of the tank based on model inputs alone?"
+    st.header("Black Box Modeling")
+    '''The simulation currently runs pretty quick due to the simple implementation of heat transfer and basic geometry.
+    As complexity increases in both those disciplines the need for a data driven model may emerge. This section showcases
+    a couple basic machine learning model in an an attempt to answer: '''
+    st.write("***Can we predict accurately predict the temperature of the tank based on model inputs alone?***")
     
     st.subheader("Data Cleaning")
     '''
@@ -86,13 +88,16 @@ with st.container():
 
             # plot actual vs predicted
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=y_test, y=predictions, mode='markers', name='Actual vs Predicted', marker=dict(color='purple')))  
+            fig.add_trace(go.Scatter(x=y_test, y=predictions, mode='markers', name='Actual vs Predicted', marker=dict(color='purple'), hovertemplate='Actual: %{x}<br>Predicted: %{y}'))  
             fig.update_xaxes(title_text="Actual Values")
             fig.update_yaxes(title_text="Predicted Values")
-            fig.update_layout(hovermode="x unified")
+            fig.update_layout(hovermode="closest")
             results.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Linear Regression")
+    '''
+    We'll start by using a linear regression model to predict the tank temperature based on the model inputs.
+    '''
     lin_reg_code = '''
     X = results_df.drop(columns=["Tank Temperatures"])
     y = results_df["Tank Temperatures"]
@@ -114,7 +119,13 @@ with st.container():
             model = LinearRegression().fit(X_train, y_train)
             predictions = model.predict(X_test)
             display_model_results(predictions, y_test)
-
+        '''
+        The performance of the linear regression model leaves room for improvement. The R2 of 70% indicates that the model struggles 
+        to explain the variance of 30% of the tank temperatures. It's clear from the plots that this is primarily happening at lower temperatures, 
+        when tank temperature is no longer strongly correlated with the any model inputs. This aligns with what we know to be true from the
+        earlier regression analysis. 
+    
+        '''
     st.subheader("Random Forest")
     forest_code = '''
     model_rf = RandomForestRegressor().fit(X_train, y_train)
@@ -127,3 +138,10 @@ with st.container():
             model_rf = RandomForestRegressor().fit(X_train, y_train)
             predictions_rf = model_rf.predict(X_test)   
             display_model_results(predictions_rf, y_test)
+        '''
+        The performance of the random forest model is much better. All error metrics are significantly lower than the linear
+        regression and the R2 is 99%. The residual plot has also greatly improved, showing less clear patterns and a fairly even spread about the
+        zero line. The Q-Q plot shows a significant deviation from the 45 degree line. This indicates that the residuals are not normally distributed. This could be
+        due to outliers or a sign of unmodeled complexity. Given more time, a deeper residual analysis and additional modeling 
+        would be warranted. 
+        '''

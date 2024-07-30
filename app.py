@@ -14,7 +14,7 @@ the_sim = st.Page("Introduction/4-The-Simulation.py", title="The Simulation",  i
 # Simulation Results Section
 basic_results = st.Page("Simulation-Results/1-Basic-Results.py", title="Basic Results", icon=":material/change_history:")
 data_analysis = st.Page("Simulation-Results/2-Data-Analysis.py", title="Data Analysis", icon=":material/square:")
-data_science = st.Page("Simulation-Results/3-Data-Science.py", title="Data Science", icon=":material/pentagon:")
+data_science = st.Page("Simulation-Results/3-Data-Science.py", title="Black Box Models", icon=":material/pentagon:")
 # Conclusion Section
 conclusion = st.Page("Conclusion/1-Conclusion.py", title="Conclusion", icon=":material/lightbulb:")
 
