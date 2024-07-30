@@ -3,11 +3,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
 from sklearn.ensemble import RandomForestRegressor
+import pickle
 
 with st.container():
     st.header("Black Box Modeling")
@@ -51,7 +51,7 @@ with st.container():
     def display_model_results(predictions, y_test):
         with st.spinner("Displaying Results..."):
             results = st.container()
-            col1, col2 = results.columns([1,3])    
+            col1, col2 = results.columns([1,5])    
             residuals = y_test - predictions
 
             # model performance metrics r2, mse, mae
@@ -59,41 +59,44 @@ with st.container():
             rmse = np.sqrt(mse)
             mae = mean_absolute_error(y_test, predictions)
             r2 = r2_score(y_test, predictions)
-            
+        
             # display metrics as st.metrics
             col1.metric("MSE:", f"{mse:.2f}")
             col1.metric("RMSE:", f"{rmse:.2f}")
             col1.metric("MAE:", f"{mae:.2f}")
             col1.metric("R2:", f"{r2:.2f}")
 
-            # Create a faceted plot using plotly
-            fig = make_subplots(rows=1, cols=2, subplot_titles=['Residuals vs Fitted Values', 'Q-Q Plot'])
-
+            # Create a figure with subplots
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 2))
+        
             # Residuals vs Fitted Values Plot
-            fig.add_trace(go.Scatter(x=predictions, y=residuals, mode='markers', name='Residuals'), row=1, col=1)
-            fig.add_trace(go.Scatter(x=predictions, y=np.zeros_like(predictions), mode='lines', line=dict(color='red', dash='dash'), name='Zero Line'), row=1, col=1)
+            ax1.scatter(predictions, residuals, s=3)
+            ax1.axhline(y=0, color='r', linestyle='--', linewidth=0.8)
+            ax1.set_xlabel('Fitted Values', fontsize=6)
+            ax1.set_ylabel('Residuals', fontsize=6)
+            ax1.set_title('Residuals vs Fitted Values', fontsize=6)
+            ax1.tick_params(axis='both', which='major', labelsize=6)
 
             # Q-Q Plot
-            qq = sm.qqplot(residuals, fit=True, line='45')
-            fig.add_trace(go.Scatter(x=qq.gca().lines[0].get_xdata(), y=qq.gca().lines[0].get_ydata(), mode='markers', name='Q-Q'), row=1, col=2)
-            fig.add_trace(go.Scatter(x=qq.gca().lines[1].get_xdata(), y=qq.gca().lines[1].get_ydata(), mode='lines', line=dict(color='red'), name='45 Degree Line'), row=1, col=2)
+            sm.qqplot(residuals, fit=True, line='45', ax=ax2)
+            ax2.set_title('Q-Q Plot', fontsize=6)
+            ax2.set_xlabel('Theoretical Quantiles', fontsize=6)
+            ax2.set_ylabel('Sample Quantiles', fontsize=6)
+            ax2.tick_params(axis='both', which='major', labelsize=6)
 
-            fig.update_xaxes(title_text="Fitted Values", row=1, col=1)
-            fig.update_xaxes(title_text="Theoretical Quantiles", row=1, col=2)
-            fig.update_yaxes(title_text="Residuals", row=1, col=1)
-            fig.update_yaxes(title_text="Sample Quantiles", row=1, col=2)
-            fig.update_layout(hovermode="x unified")
-
-            col2.plotly_chart(fig, use_container_width=True)
+            plt.tight_layout()
+            col2.pyplot(fig)
 
             # plot actual vs predicted
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=y_test, y=predictions, mode='markers', name='Actual vs Predicted', marker=dict(color='purple'), hovertemplate='Actual: %{x}<br>Predicted: %{y}'))  
-            fig.update_xaxes(title_text="Actual Values")
-            fig.update_yaxes(title_text="Predicted Values")
-            fig.update_layout(hovermode="closest")
-            results.plotly_chart(fig, use_container_width=True)
+            fig, ax = plt.subplots(figsize=(5, 1.5))
+            ax.scatter(y_test, predictions, color='purple', alpha=0.6, s=3)
+            ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=0.8)
+            ax.set_xlabel('Actual Values', fontsize=5)
+            ax.set_ylabel('Predicted Values', fontsize=5)
+            ax.tick_params(axis='both', which='major', labelsize=5)
+            plt.tight_layout()
 
+            results.pyplot(fig)
     st.subheader("Linear Regression")
     '''
     We'll start by using a linear regression model to predict the tank temperature based on the model inputs.
@@ -110,22 +113,29 @@ with st.container():
     '''
     st.code(lin_reg_code, language="python")
     # We'll use a linear regression model to predict the tank temperature based on the model inputs
-    X = results_df.drop(columns=["Tank Temperatures"])
-    y = results_df["Tank Temperatures"]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Ran once to get pickle file
+    # X = results_df.drop(columns=["Tank Temperatures"])
+    # y = results_df["Tank Temperatures"]
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    if st.button("Run Linear Regression Model"):
-        with st.spinner("Training/Testing Model..."):
-            model = LinearRegression().fit(X_train, y_train)
-            predictions = model.predict(X_test)
-            display_model_results(predictions, y_test)
-        '''
-        The performance of the linear regression model leaves room for improvement. The R2 of 70% indicates that the model struggles 
-        to explain the variance of 30% of the tank temperatures. It's clear from the plots that this is primarily happening at lower temperatures, 
-        when tank temperature is no longer strongly correlated with the any model inputs. This aligns with what we know to be true from the
-        earlier regression analysis. 
-    
-        '''
+
+    y_test = pickle.load(open("Outputs/y_test.pkl", "rb"))
+    with st.spinner("Plotting Results..."):
+        # ran once to get pickle file
+        # model = LinearRegression().fit(X_train, y_train)
+        # predictions = model.predict(X_test)
+        # pickle.dump(y_test, open("Outputs/y_test.pkl", "wb"))
+        # pickle.dump(predictions, open("Outputs/predictions.pkl", "wb"))
+
+        predictions = pickle.load(open("Outputs/predictions.pkl", "rb"))
+        display_model_results(predictions, y_test)
+    '''
+    The performance of the linear regression model leaves room for improvement. The R2 of 70% indicates that the model struggles 
+    to explain the variance of 30% of the tank temperatures. It's clear from the plots that this is primarily happening at lower temperatures, 
+    when tank temperature is no longer strongly correlated with the any model inputs. This aligns with what we know to be true from the
+    earlier regression analysis. 
+
+    '''
     st.subheader("Random Forest")
     forest_code = '''
     model_rf = RandomForestRegressor().fit(X_train, y_train)
@@ -133,15 +143,19 @@ with st.container():
     '''
     st.code(forest_code, language="python")
 
-    if st.button("Run Random Forest Model"):
-        with st.spinner("Training/Testing Model..."):
-            model_rf = RandomForestRegressor().fit(X_train, y_train)
-            predictions_rf = model_rf.predict(X_test)   
-            display_model_results(predictions_rf, y_test)
-        '''
-        The performance of the random forest model is much better. All error metrics are significantly lower than the linear
-        regression and the R2 is 99%. The residual plot has also greatly improved, showing less clear patterns and a fairly even spread about the
-        zero line. The Q-Q plot shows a significant deviation from the 45 degree line. This indicates that the residuals are not normally distributed. This could be
-        due to outliers or a sign of unmodeled complexity. Given more time, a deeper residual analysis and additional modeling 
-        would be warranted. 
-        '''
+    with st.spinner("Plotting Results..."):
+        # ran once to get pickle file
+        # model_rf = RandomForestRegressor().fit(X_train, y_train)
+        # predictions_rf = model_rf.predict(X_test)   
+
+        # pickle.dump(predictions_rf, open("Outputs/predictions_rf.pkl", "wb"))
+        predictions_rf = pickle.load(open("Outputs/predictions_rf.pkl", "rb"))
+        
+        display_model_results(predictions_rf, y_test)
+    '''
+    The performance of the random forest model is much better. All error metrics are significantly lower than the linear
+    regression and the R2 is 99%. The residual plot has also greatly improved, showing less clear patterns and a fairly even spread about the
+    zero line. The Q-Q plot shows a significant deviation from the 45 degree line. This indicates that the residuals are not normally distributed. This could be
+    due to outliers or a sign of unmodeled complexity. Given more time, a deeper residual analysis and additional modeling 
+    would be warranted. 
+    '''
