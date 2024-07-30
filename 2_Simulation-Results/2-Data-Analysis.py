@@ -22,7 +22,7 @@ results_df = pd.read_parquet("Outputs/thermal-simulation-full-year.parquet")
 # Convert to hourly to speed things up
 results_df['Time'] = pd.to_datetime(results_df['Time'])
 results_df.set_index('Time', inplace=True)
-results_df = results_df.resample('H').mean()
+results_df = results_df.resample('h').mean()
 results_df.reset_index(inplace=True)
 st.subheader("Basic Analysis")
 
