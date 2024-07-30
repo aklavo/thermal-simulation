@@ -6,35 +6,41 @@ import pandas as pd
 from plotly.subplots import make_subplots
 
 st.header("Model Inputs")
+'''
+This model takes three categories of inputs, weather,  geometry, and physical properties.
+'''
 st.subheader("Weather")
 '''
 Weather data for this simulation was obtained from the NREL's 
 [National Solar Radiation Database](https://developer.nrel.gov/docs/solar/nsrdb/psm3-5min-download/).
-This simulation will take place in 2022, Westminster, CO. **Global horizontal irradiance (GHI), clear sky GHI, 
-and outdoor dry-bulb temperature** will be pulled at a resolution of 5-min intervals. Indoor temperatures was assumed
+The data available in this report is from 2022, Westminster, CO. **Global horizontal irradiance (GHI), clear sky GHI, 
+and outdoor dry-bulb temperature** are used at a resolution of 5-min intervals. Indoor temperatures was assumed
 to be a roughly 21.11°C (70°F). A random deviation of ±0.5°C was added to the indoor temperature every time-step to simulate
 subtle changes in internal loads.
 
-Data is requested via an API call returning a csv. This is then read into a pandas dataframe and visualized below.
+The method responsible for pulling the weather data is located in the `inputs.py` file. In that file the `get_weather_data()` takes
+in the latitude and longitude of the location, the year, the interval, attributes to be pulled, and a resampling frequency. The method
+sends a GET request to the NREL API. The csv formatted data returned is then cleaned and saved as a parquet file in the `Outputs` folder.
+Below is a years worth of GHI, clearksy GHI, and outside air temperature data plotted.
 '''
+weather_df = pd.read_parquet('Outputs/weather_data.parquet')
 
-with st.spinner("Plotting weather data..."):
-    weather_df = pd.read_parquet('Outputs/weather_data.parquet')
- 
+@st.cache_data  
+def plot_weather(df):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
-        go.Scatter(x=weather_df.index, y=weather_df['GHI'], name="GHI"),
+        go.Scatter(x=weather_df.index, y=weather_df['GHI'], name="GHI", line=dict(color="goldenrod")),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=weather_df.index, y=weather_df['Clearsky GHI'], name="Clearsky GHI"),
+        go.Scatter(x=weather_df.index, y=weather_df['Clearsky GHI'], name="Clearsky GHI", visible='legendonly'),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=weather_df.index, y=weather_df['Temperature'], name="Temperature"),
+        go.Scatter(x=weather_df.index, y=weather_df['Temperature'], name="Temperature", line=dict(color="green", dash="dash")),
         secondary_y=True,
     )
 
@@ -43,14 +49,17 @@ with st.spinner("Plotting weather data..."):
         hovermode="x unified"
     )
     
-    fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False)
-    fig.update_yaxes(title_text="Temperature (°C)", secondary_y=True)
-
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_yaxes(title_text="Irradiance (W/m^2)", secondary_y=False, title_font=dict(color="goldenrod"), tickfont=dict(color="goldenrod"))
+    fig.update_yaxes(title_text="Temperature (°C)", secondary_y=True, title_font=dict(color="green"), tickfont=dict(color="green"))
+    return fig
+    
+with st.spinner("Plotting weather data..."):
+    st.plotly_chart(plot_weather(weather_df), use_container_width=True)
 
 st.subheader("Geometry")
 '''
-The geometry of each component of the system is defined below.
+The geometries of each component were simplified to lower the complexity of heat transfer and aid in the speed of development of
+the project. With more time, these geometries would be refined to more accurately model real world devices. The geometry of each component of the system is defined below.
 ##### Solar Panel
 '''
 
@@ -254,10 +263,10 @@ pipe_fig.update_layout(
 st.plotly_chart(pipe_fig, use_container_width=True)
 
 
-st.subheader("Physical Constants")
+st.subheader("Physical Properties")
 '''
-The physical constants used in this simulation are defined below. In reality many of these values
-vary with the temperature and pressure of the system. Future work would more incorporate more dynamic physical
+The physical properties used in this simulation are defined below. In reality many of these values
+vary with the temperature and pressure of the system. Future work would incorporate more dynamic physical
 properties.
 '''
 
