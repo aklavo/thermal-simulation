@@ -43,7 +43,7 @@ with st.container():
     results_df["Hour"] = results_df["Time"].dt.hour
     results_df["Minute"] = results_df["Time"].dt.minute
     results_df.drop(columns=["Time"], inplace=True)
-    results_df
+    st.dataframe(results_df, hide_index=True)
 with st.container():
     def display_model_results(predictions, y_test):
         with st.spinner("Displaying Results..."):

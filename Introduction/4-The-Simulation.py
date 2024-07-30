@@ -116,4 +116,4 @@ with st.spinner("Getting Data..."):
 with st.spinner("Plotting simulation results..."):
     fig = main.sim_output_plot(three_days_df)
     st.plotly_chart(fig, use_container_width=True)
-st.dataframe(three_days_df)
+st.dataframe(three_days_df, hide_index=True)
