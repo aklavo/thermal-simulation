@@ -132,7 +132,7 @@ with st.container():
     '''
     The performance of the linear regression model leaves room for improvement. The R2 of 70% indicates that the model struggles 
     to explain the variance of 30% of the tank temperatures. It's clear from the plots that this is primarily happening at lower temperatures, 
-    when tank temperature is no longer strongly correlated with the any model inputs. This aligns with what we know to be true from the
+    when tank temperature is no longer strongly correlated with the any model inputs. This aligns with what we know to be true from
     earlier regression analysis. 
 
     '''
@@ -153,7 +153,7 @@ with st.container():
         
         display_model_results(predictions_rf, y_test)
     '''
-    The performance of the random forest model is much better. All error metrics are significantly lower than the linear
+    The random forest model produces more accurate predictions. All error metrics are significantly lower than the linear
     regression and the R2 is 99%. The residual plot has also greatly improved, showing less clear patterns and a fairly even spread about the
     zero line. The Q-Q plot shows a significant deviation from the 45 degree line. This indicates that the residuals are not normally distributed. This could be
     due to outliers or a sign of unmodeled complexity. Given more time, a deeper residual analysis and additional modeling 
