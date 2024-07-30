@@ -9,6 +9,10 @@ This simulation currently uses the following inputs:
 - Start/End Datetime (must be within the weather data range)
 - Time-step
 - Clouds (1 = GHI, -1 = Clearsky GHI, 0 = no sun)
+- heat_loss (True = heat loss, False = no heat loss)
+- pump_control (0 = no pump, 1 = constant pump, 2 = variable pump)
+- flow_rate_max (m^3/s)
+- DEV (True = just plt.show() output graph, False = save png and parquet to Outputs folder)
 
 '''
 st.subheader("Simulation")
